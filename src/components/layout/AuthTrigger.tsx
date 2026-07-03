@@ -3,17 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
+import { cn } from "@/lib/utils";
 
-export function AuthTrigger() {
+type AuthTriggerProps = {
+  className?: string;
+};
+
+export function AuthTrigger({ className }: AuthTriggerProps) {
   const { isLoggedIn } = useAuth();
 
   if (isLoggedIn) {
     return (
-      <Link
-        href="/mypage"
-        aria-label="마이 프로필"
-        className="transition-opacity hover:opacity-60"
-      >
+      <Link href="/mypage" className={cn(className)}>
+        <span>My Page</span>
         <Image
           src="/images/icon-profile.png"
           alt=""
@@ -26,11 +28,8 @@ export function AuthTrigger() {
   }
 
   return (
-    <Link
-      href="/login"
-      aria-label="로그인"
-      className="transition-opacity hover:opacity-60"
-    >
+    <Link href="/login" className={cn(className)}>
+      <span>Log In</span>
       <Image
         src="/images/icon-login.png"
         alt=""
