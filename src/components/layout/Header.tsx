@@ -10,9 +10,12 @@ const NAV_ITEMS = [
 ] as const;
 
 const UTILITY_ITEMS = [
-  { label: "검색", href: "/search", icon: "/images/icon-search.png" },
-  { label: "장바구니", href: "/cart", icon: "/images/icon-cart.png" },
+  { label: "Search", href: "/search", icon: "/images/icon-search.png" },
+  { label: "Cart", href: "/cart", icon: "/images/icon-cart.png" },
 ] as const;
+
+const utilityLinkClassName =
+  "flex items-center gap-1.5 text-sm font-medium tracking-wide text-black transition-opacity hover:opacity-60";
 
 export function Header() {
   return (
@@ -42,18 +45,14 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-5 lg:gap-6">
+        <div className="flex items-center gap-5 lg:gap-8">
           {UTILITY_ITEMS.map(({ label, href, icon }) => (
-            <Link
-              key={href}
-              href={href}
-              aria-label={label}
-              className="transition-opacity hover:opacity-60"
-            >
+            <Link key={href} href={href} className={utilityLinkClassName}>
+              <span>{label}</span>
               <Image src={icon} alt="" width={24} height={24} aria-hidden />
             </Link>
           ))}
-          <AuthTrigger />
+          <AuthTrigger className={utilityLinkClassName} />
         </div>
       </div>
     </header>
