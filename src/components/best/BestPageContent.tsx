@@ -1,14 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { BestCategory, BestProduct, SortOption } from "@/types/best";
-import { BEST_PRODUCTS } from "@/constants/best-mock-data";
+import type { BestCategory, Product, SortOption } from "@/types/best";
+import { BEST_CATEGORIES, BEST_PRODUCTS } from "@/constants/best-mock-data";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { CategoryTabs } from "@/components/best/CategoryTabs";
 import { SortDropdown } from "@/components/best/SortDropdown";
 import { BestProductGrid } from "@/components/best/BestProductGrid";
 
-function sortProducts(products: BestProduct[], sort: SortOption): BestProduct[] {
+function sortProducts(products: Product[], sort: SortOption): Product[] {
   const sorted = [...products];
 
   switch (sort) {
