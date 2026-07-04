@@ -15,12 +15,8 @@ export default function HomePage() {
       <HeroSection slides={HERO_SLIDES} />
       <SelectionNav items={SELECTION_ITEMS} />
       <PopularCategories categories={POPULAR_CATEGORIES} />
-      {PRODUCT_SECTIONS.map((section, index) => (
-        <ProductSection
-          key={section.id}
-          section={section}
-          isLast={index === PRODUCT_SECTIONS.length - 1}
-        />
+      {PRODUCT_SECTIONS.map((section) => (
+        <ProductSection key={section.id} section={section} />
       ))}
     </main>
   );

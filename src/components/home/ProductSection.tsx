@@ -6,19 +6,17 @@ import { HomeSection, SectionHeading } from "@/components/home/SectionLayout";
 
 interface ProductSectionProps {
   section: ProductCategorySection;
-  isLast?: boolean;
 }
 
-export function ProductSection({ section, isLast = false }: ProductSectionProps) {
+export function ProductSection({ section }: ProductSectionProps) {
   const headingId = `product-section-${section.id}`;
 
   return (
-    <HomeSection
-      aria-labelledby={headingId}
-      style={isLast ? { marginBottom: 0 } : undefined}
-    >
+    <HomeSection aria-labelledby={headingId}>
       <PageContainer>
-        <SectionHeading id={headingId}>{section.title}</SectionHeading>
+        <SectionHeading id={headingId} size="secondary">
+          {section.title}
+        </SectionHeading>
         <ul className="hidden w-full justify-between lg:flex">
           {section.products.map((product) => (
             <li key={product.id}>

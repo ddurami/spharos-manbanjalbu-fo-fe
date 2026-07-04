@@ -37,7 +37,7 @@ function CategoryCard({
       style={{ width: size.width, height: ROW_HEIGHT }}
     >
       {category.label ? (
-        <p className="mb-2 text-sm font-medium text-foreground">{category.label}</p>
+        <p className="mb-2 text-[30px] font-medium text-foreground">{category.label}</p>
       ) : (
         <span className="mb-2 block h-5" aria-hidden="true" />
       )}

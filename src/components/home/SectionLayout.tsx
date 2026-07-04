@@ -5,14 +5,21 @@ interface SectionHeadingProps {
   id: string;
   children: React.ReactNode;
   className?: string;
+  size?: "primary" | "secondary";
 }
 
-export function SectionHeading({ id, children, className }: SectionHeadingProps) {
+export function SectionHeading({
+  id,
+  children,
+  className,
+  size = "primary",
+}: SectionHeadingProps) {
   return (
     <h2
       id={id}
       className={cn(
-        "text-lg font-bold text-foreground sm:text-xl",
+        "font-bold text-foreground",
+        size === "primary" ? "text-[36px]" : "text-[30px]",
         className,
       )}
       style={{ marginBottom: LAYOUT.titleGap }}

@@ -30,7 +30,7 @@ function SelectionNavItem({ item }: { item: SelectionItem }) {
             className="size-full transition-opacity group-hover:opacity-80"
           />
         </span>
-        <span className="text-center text-sm leading-tight text-foreground">
+        <span className="text-center text-[20px] leading-tight text-foreground">
           {item.label}
         </span>
       </Link>
@@ -38,11 +38,21 @@ function SelectionNavItem({ item }: { item: SelectionItem }) {
   );
 }
 
-function SelectionRow({ rowItems }: { rowItems: SelectionItem[] }) {
+function SelectionRowFirst({ rowItems }: { rowItems: SelectionItem[] }) {
+  return (
+    <ul className="flex w-full justify-between">
+      {rowItems.map((item) => (
+        <SelectionNavItem key={item.id} item={item} />
+      ))}
+    </ul>
+  );
+}
+
+function SelectionRowSecond({ rowItems }: { rowItems: SelectionItem[] }) {
   return (
     <ul
       className="flex w-full justify-start"
-      style={{ gap: SELECTION.itemGap }}
+      style={{ gap: SELECTION.rowGap }}
     >
       {rowItems.map((item) => (
         <SelectionNavItem key={item.id} item={item} />
@@ -58,8 +68,8 @@ export function SelectionNav({ items }: SelectionNavProps) {
         <SectionHeading id="selection-heading">스타벅스 셀렉션</SectionHeading>
         <nav aria-label="스타벅스 셀렉션 카테고리">
           <div className="flex flex-col gap-10">
-            <SelectionRow rowItems={items.slice(0, 5)} />
-            <SelectionRow rowItems={items.slice(5)} />
+            <SelectionRowFirst rowItems={items.slice(0, SELECTION.firstRowCount)} />
+            <SelectionRowSecond rowItems={items.slice(SELECTION.firstRowCount)} />
           </div>
         </nav>
       </PageContainer>

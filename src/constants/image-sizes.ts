@@ -7,7 +7,10 @@ export const LAYOUT = {
 
 export const SELECTION = {
   circleDiameter: 190,
-  itemGap: 50,
+  firstRowCount: 5,
+  /** 첫 번째 줄 space-between 기준 간격 (1320px 컨테이너, 5개 아이템) */
+  rowGap:
+    (LAYOUT.contentMaxWidth - 5 * 190) / 4,
 } as const;
 
 /** 공통 콘텐츠 이미지 비율 (200 × 235) */

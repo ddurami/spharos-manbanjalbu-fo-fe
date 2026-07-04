@@ -34,8 +34,8 @@ export function ProductCard({ product }: ProductCardProps) {
           <ProductBadgeList badges={product.badges} />
         )}
       </div>
-      <h3 className="truncate text-sm text-foreground">{product.name}</h3>
-      <p className="mt-1 text-sm font-bold text-foreground">
+      <h3 className="truncate text-[16px] text-foreground">{product.name}</h3>
+      <p className="mt-1 text-[16px] font-bold text-foreground">
         {formatPrice(product.price)}
       </p>
     </div>
