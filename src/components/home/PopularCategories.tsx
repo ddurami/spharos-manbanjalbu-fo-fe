@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { PopularCategory } from "@/types/home";
 import { POPULAR_CATEGORY } from "@/constants/image-sizes";
@@ -37,7 +37,12 @@ function CategoryCard({
       style={{ width: size.width, height: ROW_HEIGHT }}
     >
       {category.label ? (
-        <p className="mb-2 text-[30px] font-medium text-foreground">{category.label}</p>
+        <p
+          className="font-normal text-[30px] text-foreground"
+          style={{ marginBottom: POPULAR_CATEGORY.subtitleGap }}
+        >
+          {category.label}
+        </p>
       ) : (
         <span className="mb-2 block h-5" aria-hidden="true" />
       )}
@@ -63,33 +68,12 @@ function chunkCategories(categories: PopularCategory[]): PopularCategory[][] {
     pages.push(categories.slice(i, i + POPULAR_CATEGORY.itemsPerPage));
   }
 
-  return pages;
+  return pages.slice(0, POPULAR_CATEGORY.pageCount);
 }
 
 export function PopularCategories({ categories }: PopularCategoriesProps) {
   const pages = useMemo(() => chunkCategories(categories), [categories]);
   const [api, setApi] = useState<CarouselApi>();
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
-
-  const onSelect = useCallback(() => {
-    if (!api) return;
-    setCanScrollPrev(api.canScrollPrev());
-    setCanScrollNext(api.canScrollNext());
-  }, [api]);
-
-  useEffect(() => {
-    if (!api) return;
-
-    onSelect();
-    api.on("select", onSelect);
-    api.on("reInit", onSelect);
-
-    return () => {
-      api.off("select", onSelect);
-      api.off("reInit", onSelect);
-    };
-  }, [api, onSelect]);
 
   return (
     <HomeSection aria-labelledby="popular-categories-heading">
@@ -101,7 +85,7 @@ export function PopularCategories({ categories }: PopularCategoriesProps) {
         <div className="relative">
           <Carousel
             setApi={setApi}
-            opts={{ align: "start", containScroll: "trimSnaps" }}
+            opts={{ loop: true, align: "start", containScroll: "trimSnaps" }}
             className="w-full"
             aria-label="인기 카테고리 목록"
           >
@@ -139,10 +123,9 @@ export function PopularCategories({ categories }: PopularCategoriesProps) {
               type="button"
               variant="ghost"
               size="icon-sm"
-              disabled={!canScrollPrev}
               onClick={() => api?.scrollPrev()}
               aria-label="이전 카테고리"
-              className="text-foreground hover:bg-transparent disabled:opacity-30"
+              className="text-foreground hover:bg-transparent"
             >
               <ChevronLeft className="size-5" strokeWidth={1.5} />
             </Button>
@@ -150,10 +133,9 @@ export function PopularCategories({ categories }: PopularCategoriesProps) {
               type="button"
               variant="ghost"
               size="icon-sm"
-              disabled={!canScrollNext}
               onClick={() => api?.scrollNext()}
               aria-label="다음 카테고리"
-              className="text-foreground hover:bg-transparent disabled:opacity-30"
+              className="text-foreground hover:bg-transparent"
             >
               <ChevronRight className="size-5" strokeWidth={1.5} />
             </Button>

@@ -27,6 +27,8 @@ export const POPULAR_CATEGORY = {
   large: { width: 365, height: 430 },
   small: { width: 238, height: 280 },
   itemsPerPage: 4,
+  pageCount: 5,
+  subtitleGap: 80,
 } as const;
 
 export const PRODUCT_IMAGE = {

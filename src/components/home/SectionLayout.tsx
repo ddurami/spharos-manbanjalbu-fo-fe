@@ -18,8 +18,9 @@ export function SectionHeading({
     <h2
       id={id}
       className={cn(
-        "font-bold text-foreground",
-        size === "primary" ? "text-[36px]" : "text-[30px]",
+        size === "primary"
+          ? "font-bold text-[36px] text-foreground"
+          : "font-normal text-[30px] text-foreground",
         className,
       )}
       style={{ marginBottom: LAYOUT.titleGap }}

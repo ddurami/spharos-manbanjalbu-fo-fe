@@ -123,6 +123,69 @@ export const POPULAR_CATEGORIES: PopularCategory[] = [
     alt: "스타벅스 기프트 카테고리",
     imageSrc: STARBUCKS_IMAGES.popular.gift,
   },
+  {
+    id: "featured-3",
+    alt: "스타벅스 콜드컵 추천 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.featured3,
+  },
+  {
+    id: "cold-cup",
+    label: "콜드컵",
+    alt: "콜드컵 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.coldCup,
+  },
+  {
+    id: "bottle",
+    alt: "스타벅스 보틀 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.bottle,
+  },
+  {
+    id: "syrup",
+    alt: "스타벅스 시럽 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.syrup,
+  },
+  {
+    id: "featured-4",
+    alt: "스타벅스 푸드 추천 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.featured4,
+  },
+  {
+    id: "sandwich",
+    label: "샌드위치",
+    alt: "샌드위치 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.sandwich,
+  },
+  {
+    id: "cake",
+    alt: "스타벅스 케이크 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.cake,
+  },
+  {
+    id: "tea",
+    alt: "스타벅스 티 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.tea,
+  },
+  {
+    id: "featured-5",
+    alt: "스타벅스 액세서리 추천 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.featured5,
+  },
+  {
+    id: "accessory",
+    label: "액세서리",
+    alt: "액세서리 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.accessory,
+  },
+  {
+    id: "online-exclusive",
+    alt: "온라인 전용 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.coldCup,
+  },
+  {
+    id: "season-gift",
+    alt: "시즌 선물 카테고리",
+    imageSrc: STARBUCKS_IMAGES.popular.gift,
+  },
 ];
 
 const PRODUCT_IMAGE_MAP = {
