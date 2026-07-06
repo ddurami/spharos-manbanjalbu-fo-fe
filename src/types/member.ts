@@ -78,3 +78,14 @@ export type MemberLoginResponse = {
   name: string;
   grade: string;
 };
+
+export type FindLoginIdResponse = {
+  loginId: string;
+  authMethod?: "EMAIL" | "PASS";
+  verifiedValue?: string;
+};
+
+export type ResetPasswordResponse = {
+  loginId: string;
+  message: string;
+};

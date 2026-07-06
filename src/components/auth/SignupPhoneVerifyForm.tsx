@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SignupStepIndicator } from "@/components/auth/SignupStepIndicator";
 import { ApiError } from "@/lib/api/client";
 import {
@@ -9,6 +9,12 @@ import {
   sendPhoneVerification,
 } from "@/lib/api/member";
 import { updateSignupSession } from "@/lib/signup-session";
+import {
+  formatVerificationTimer,
+  useVerificationCountdown,
+  VERIFICATION_TIMER_SECONDS,
+} from "@/lib/use-verification-countdown";
+import type { VerificationConfirmResponse } from "@/types/member";
 import {
   formatPhoneNumber,
   getPhoneFormatError,
@@ -18,13 +24,6 @@ import {
 } from "@/lib/signup-validation";
 
 const DEFAULT_RECEIVE_NUMBER = "1666-3538";
-const TIMER_SECONDS = 5 * 60;
-
-function formatTimer(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
-}
 
 function formatReceivePhoneNumber(value: string) {
   const digits = value.replace(/\D/g, "");
@@ -36,15 +35,24 @@ function formatReceivePhoneNumber(value: string) {
   return value;
 }
 
-export function SignupPhoneVerifyForm() {
+type SignupPhoneVerifyFormProps = {
+  onVerified?: (result: VerificationConfirmResponse) => Promise<void> | void;
+};
+
+export function SignupPhoneVerifyForm({
+  onVerified,
+}: SignupPhoneVerifyFormProps = {}) {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [sendCount, setSendCount] = useState(0);
-  const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [verificationCode, setVerificationCode] = useState("");
+  const { remainingSeconds, isTimerActive } = useVerificationCountdown(
+    isCodeSent ? sendCount : 0,
+    VERIFICATION_TIMER_SECONDS,
+  );
   const [sendGuideMessage, setSendGuideMessage] = useState<string | null>(null);
   const [receivePhoneNumber, setReceivePhoneNumber] = useState(
     DEFAULT_RECEIVE_NUMBER,
@@ -57,26 +65,7 @@ export function SignupPhoneVerifyForm() {
 
   const phoneFormatError = getPhoneFormatError(phone);
   const canSendCode = isPhoneFormatValid(phone);
-  const isTimerActive = remainingSeconds > 0;
   const formattedReceiveNumber = formatReceivePhoneNumber(receivePhoneNumber);
-
-  useEffect(() => {
-    if (!isCodeSent || sendCount === 0) {
-      return;
-    }
-
-    const timerId = window.setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          window.clearInterval(timerId);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => window.clearInterval(timerId);
-  }, [isCodeSent, sendCount]);
 
   async function handleSendCode() {
     const error = validatePhone(phone);
@@ -106,7 +95,6 @@ export function SignupPhoneVerifyForm() {
           : DEFAULT_RECEIVE_NUMBER,
       );
       setSendGuideMessage(result.message?.trim() || null);
-      setRemainingSeconds(TIMER_SECONDS);
       setIsCodeSent(true);
       setSendCount((prev) => prev + 1);
     } catch (sendError) {
@@ -163,17 +151,21 @@ export function SignupPhoneVerifyForm() {
         verificationCode,
       );
 
-      setVerifyMessage({
-        type: "success",
-        text: "인증되었습니다",
-      });
-      updateSignupSession({
-        phone: result.verifiedValue,
-        verifyMethod: "phone",
-        verificationToken: result.verificationToken,
-        verifiedValue: result.verifiedValue,
-      });
-      router.push("/signup/terms");
+      if (onVerified) {
+        await onVerified(result);
+      } else {
+        setVerifyMessage({
+          type: "success",
+          text: "인증되었습니다",
+        });
+        updateSignupSession({
+          phone: result.verifiedValue,
+          verifyMethod: "phone",
+          verificationToken: result.verificationToken,
+          verifiedValue: result.verifiedValue,
+        });
+        router.push("/signup/terms");
+      }
     } catch (verifyError) {
       setVerifyMessage({
         type: "error",
@@ -249,7 +241,7 @@ export function SignupPhoneVerifyForm() {
             </p>
             {isTimerActive ? (
               <span className="shrink-0 text-sm font-medium text-[#E75B5B]">
-                {formatTimer(remainingSeconds)}
+                {formatVerificationTimer(remainingSeconds)}
               </span>
             ) : (
               <span className="shrink-0 text-sm font-medium text-red-500">

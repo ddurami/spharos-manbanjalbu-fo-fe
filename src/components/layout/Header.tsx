@@ -1,13 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AuthTrigger } from "@/components/layout/AuthTrigger";
-
-const NAV_ITEMS = [
-  { label: "MENU", href: "/menu" },
-  { label: "EVENT", href: "/event" },
-  { label: "BEST", href: "/best" },
-  { label: "MY PAGE", href: "/mypage" },
-] as const;
+import { HeaderNav } from "@/components/layout/HeaderNav";
 
 const UTILITY_ITEMS = [
   { label: "Search", href: "/search", icon: "/images/icon-search.png" },
@@ -32,17 +26,7 @@ export function Header() {
             />
           </Link>
 
-          <nav className="hidden items-center gap-8 md:flex lg:gap-10">
-            {NAV_ITEMS.map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                className="text-sm font-medium tracking-wide text-black transition-opacity hover:opacity-60"
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
+          <HeaderNav />
         </div>
 
         <div className="flex items-center gap-5 lg:gap-8">
