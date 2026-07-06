@@ -4,7 +4,7 @@ import Link from "next/link";
 export function MypagePersonalInfoLink() {
   return (
     <Link
-      href="#"
+      href="/mypage/personal-info"
       className="flex items-center justify-between border border-sb-border bg-white px-[30px] py-5 transition-opacity hover:opacity-70"
     >
       <span className="text-2xl font-normal text-foreground">개인정보 관리</span>
