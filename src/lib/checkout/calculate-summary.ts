@@ -18,6 +18,4 @@ export function calculateCheckoutSummary(items: OrderItem[]): CheckoutSummary {
   };
 }
 
-export function formatPrice(amount: number) {
-  return amount.toLocaleString("ko-KR");
-}
+export { formatPrice } from "@/lib/format";

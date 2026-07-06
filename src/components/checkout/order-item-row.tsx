@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Minus, Plus, X } from "lucide-react";
 
-import { PriceDisplay } from "@/components/checkout/price-display";
+import { PriceDisplay } from "@/components/common/price-display";
 import { Button } from "@/components/ui/button";
 import type { OrderItem } from "@/lib/checkout/types";
 import { cn } from "@/lib/utils";
