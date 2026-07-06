@@ -5,7 +5,7 @@ import { MinusIcon, PlusIcon, Share2Icon, ShoppingCartIcon } from "lucide-react"
 import type { ProductDetail } from "@/types/product-detail";
 import { PRODUCT_DETAIL } from "@/constants/product-detail-sizes";
 import { ImagePlaceholder } from "@/components/home/ImagePlaceholder";
-import { CartAddedAlert } from "@/components/cart/CartAddedAlert";
+import { CartAddedAlert } from "@/components//product-detail/CartAddedAlert";
 import { useCart } from "@/contexts/cart-context";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
