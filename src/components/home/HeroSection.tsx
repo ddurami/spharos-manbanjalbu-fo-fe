@@ -124,7 +124,7 @@ export function HeroSection({ slides }: HeroSectionProps) {
               className={cn(
                 "pointer-events-auto size-2.5 rounded-full border transition-colors",
                 selectedIndex === index
-                  ? "border-starbucks-green bg-starbucks-green"
+                  ? "border-[#00A864] bg-[#00A864]"
                   : "border-white bg-white",
               )}
             />

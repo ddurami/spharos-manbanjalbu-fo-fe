@@ -11,13 +11,13 @@ import {
 
 export default function HomePage() {
   return (
-    <main id="main-content">
+    <div id="main-content">
       <HeroSection slides={HERO_SLIDES} />
       <SelectionNav items={SELECTION_ITEMS} />
       <PopularCategories categories={POPULAR_CATEGORIES} />
       {PRODUCT_SECTIONS.map((section) => (
         <ProductSection key={section.id} section={section} />
       ))}
-    </main>
+    </div>
   );
 }
