@@ -44,7 +44,7 @@ export function BestPageContent() {
   }, [selectedCategory, selectedSort]);
 
   return (
-    <main className="py-10">
+    <div className="py-10">
       <PageContainer>
         <h1 className="text-[30px] font-normal text-[#121212]">BEST</h1>
 
@@ -68,6 +68,6 @@ export function BestPageContent() {
           <BestProductGrid products={filteredProducts} />
         </div>
       </PageContainer>
-    </main>
+    </div>
   );
 }

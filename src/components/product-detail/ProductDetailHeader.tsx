@@ -6,6 +6,7 @@ import type { ProductDetail } from "@/types/product-detail";
 import { PRODUCT_DETAIL } from "@/constants/product-detail-sizes";
 import { ImagePlaceholder } from "@/components/home/ImagePlaceholder";
 import { CartAddedAlert } from "@/components/cart/CartAddedAlert";
+import { ShareAlert } from "@/components/product-detail/ShareAlert";
 import { useCart } from "@/contexts/cart-context";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,7 @@ interface ProductDetailHeaderProps {
 export function ProductDetailHeader({ product }: ProductDetailHeaderProps) {
   const [quantity, setQuantity] = useState(1);
   const [isCartAlertOpen, setIsCartAlertOpen] = useState(false);
+  const [isShareAlertOpen, setIsShareAlertOpen] = useState(false);
   const { addToCart } = useCart();
 
   const totalPrice = product.price * quantity;
@@ -30,6 +32,10 @@ export function ProductDetailHeader({ product }: ProductDetailHeaderProps) {
       thumbnailSrc: product.thumbnailSrc,
     });
     setIsCartAlertOpen(true);
+  };
+
+  const handleShare = () => {
+    setIsShareAlertOpen(true);
   };
 
   return (
@@ -60,6 +66,7 @@ export function ProductDetailHeader({ product }: ProductDetailHeaderProps) {
           </h1>
           <button
             type="button"
+            onClick={handleShare}
             className="shrink-0 text-[#121212] transition-opacity hover:opacity-70"
             aria-label="공유하기"
           >
@@ -146,6 +153,12 @@ export function ProductDetailHeader({ product }: ProductDetailHeaderProps) {
       <CartAddedAlert
         open={isCartAlertOpen}
         onClose={() => setIsCartAlertOpen(false)}
+      />
+
+      <ShareAlert
+        open={isShareAlertOpen}
+        onClose={() => setIsShareAlertOpen(false)}
+        shareTitle={product.name}
       />
     </>
   );

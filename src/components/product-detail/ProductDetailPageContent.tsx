@@ -19,7 +19,7 @@ export function ProductDetailPageContent({
   const [activeTab, setActiveTab] = useState<ProductDetailTab>("detail");
 
   return (
-    <main className="py-10">
+    <div className="py-10">
       <PageContainer>
         <ProductDetailHeader product={product} />
 
@@ -40,6 +40,6 @@ export function ProductDetailPageContent({
 
         <RelatedProductsSection relatedProductIds={product.relatedProductIds} />
       </PageContainer>
-    </main>
+    </div>
   );
 }

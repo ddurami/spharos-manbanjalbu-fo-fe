@@ -1,0 +1,47 @@
+import { cn } from "@/lib/utils";
+import { LAYOUT } from "@/constants/image-sizes";
+
+interface SectionHeadingProps {
+  id: string;
+  children: React.ReactNode;
+  className?: string;
+  size?: "primary" | "secondary";
+}
+
+export function SectionHeading({
+  id,
+  children,
+  className,
+  size = "primary",
+}: SectionHeadingProps) {
+  return (
+    <h2
+      id={id}
+      className={cn(
+        size === "primary"
+          ? "font-bold text-[36px] text-foreground"
+          : "font-normal text-[30px] text-foreground",
+        className,
+      )}
+      style={{ marginBottom: LAYOUT.titleGap }}
+    >
+      {children}
+    </h2>
+  );
+}
+
+interface HomeSectionProps extends React.ComponentProps<"section"> {
+  children: React.ReactNode;
+}
+
+export function HomeSection({ children, className, ...props }: HomeSectionProps) {
+  return (
+    <section
+      className={cn(className)}
+      style={{ marginBottom: LAYOUT.sectionGap }}
+      {...props}
+    >
+      {children}
+    </section>
+  );
+}

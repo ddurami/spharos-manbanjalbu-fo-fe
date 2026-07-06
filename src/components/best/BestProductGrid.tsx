@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface BestProductGridProps {
   products: BestProduct[];
+  emptyMessage?: string;
 }
 
 function chunkProducts(products: BestProduct[], size: number): BestProduct[][] {
@@ -17,13 +18,16 @@ function chunkProducts(products: BestProduct[], size: number): BestProduct[][] {
   return rows;
 }
 
-export function BestProductGrid({ products }: BestProductGridProps) {
+export function BestProductGrid({
+  products,
+  emptyMessage = "해당 카테고리에 상품이 없습니다.",
+}: BestProductGridProps) {
   const rows = chunkProducts(products, BEST_GRID.itemsPerRow);
 
   if (products.length === 0) {
     return (
       <p className="py-20 text-center text-[16px] text-[#6c6c6c]">
-        해당 카테고리에 상품이 없습니다.
+        {emptyMessage}
       </p>
     );
   }

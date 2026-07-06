@@ -13,28 +13,33 @@ interface ProductDetailImageProps {
 
 export function ProductDetailImage({ imageSrc, alt }: ProductDetailImageProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const collapsedMaxHeight = Math.round(
+    (PRODUCT_DETAIL.detailImageMaxHeight * PRODUCT_DETAIL.detailImageDisplayWidth) /
+      PRODUCT_DETAIL.contentMaxWidth,
+  );
 
   return (
     <div className="flex flex-col items-center">
       <div
-        className={cn(
-          "relative w-full overflow-hidden transition-[max-height] duration-500 ease-in-out",
-          !isExpanded && "max-h-[1500px]",
-        )}
+        className="relative mx-auto w-full overflow-hidden transition-[max-height] duration-500 ease-in-out"
+        style={{
+          maxWidth: PRODUCT_DETAIL.detailImageDisplayWidth,
+          maxHeight: isExpanded ? undefined : collapsedMaxHeight,
+        }}
       >
         {imageSrc ? (
           <Image
             src={imageSrc}
             alt={alt}
-            width={1320}
-            height={2400}
-            className="h-auto w-full object-cover object-top"
-            sizes="1320px"
+            width={PRODUCT_DETAIL.detailImageDisplayWidth}
+            height={PRODUCT_DETAIL.detailImageDisplayHeight}
+            className="mx-auto h-auto w-full object-cover object-top"
+            sizes={`${PRODUCT_DETAIL.detailImageDisplayWidth}px`}
           />
         ) : (
           <div
             className="w-full bg-placeholder"
-            style={{ height: PRODUCT_DETAIL.detailImageMaxHeight }}
+            style={{ height: collapsedMaxHeight }}
             role="img"
             aria-label={alt}
           />

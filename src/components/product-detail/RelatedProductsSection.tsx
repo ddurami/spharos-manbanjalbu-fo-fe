@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ALL_PRODUCTS } from "@/constants/best-mock-data";
 import { BestProductCard } from "@/components/best/BestProductCard";
 
@@ -27,12 +26,7 @@ export function RelatedProductsSection({
       <ul className="flex w-full justify-between">
         {relatedProducts.map((product) => (
           <li key={product.id}>
-            <Link
-              href={`/products/${product.id}`}
-              className="block transition-opacity hover:opacity-80"
-            >
-              <BestProductCard product={product} />
-            </Link>
+            <BestProductCard product={product} />
           </li>
         ))}
       </ul>

@@ -1,5 +1,6 @@
 import type { ProductDetail, ProductGuideSection } from "@/types/product-detail";
 import { ALL_PRODUCTS } from "@/constants/best-mock-data";
+import { PRODUCT_DETAIL } from "@/constants/product-detail-sizes";
 import { getProductImage } from "@/constants/product-images";
 
 const GUIDE_SECTIONS: ProductGuideSection[] = [
@@ -44,7 +45,7 @@ const GUIDE_SECTIONS: ProductGuideSection[] = [
 ];
 
 function unsplashDetailImage(): string {
-  return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1320&h=2400&q=80";
+  return `https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=${PRODUCT_DETAIL.detailImageDisplayWidth}&h=${PRODUCT_DETAIL.detailImageDisplayHeight}&q=80`;
 }
 
 export function getProductDetail(productId: string): ProductDetail | undefined {
