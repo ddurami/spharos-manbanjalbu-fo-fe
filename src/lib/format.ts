@@ -1,3 +1,3 @@
-export function formatPrice(price: number): string {
-  return `${price.toLocaleString("ko-KR")}원`;
+export function formatPrice(amount: number) {
+  return amount.toLocaleString("ko-KR");
 }

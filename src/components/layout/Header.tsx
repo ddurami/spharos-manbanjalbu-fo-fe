@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { label: "BEST", href: "/best" },
   { label: "MY PAGE", href: "/mypage" },
 ] as const;
+import { HeaderNav } from "@/components/layout/HeaderNav";
 
 const UTILITY_ITEMS = [
   { label: "Search", href: "/search", icon: "/images/icon-search.png" },
@@ -43,6 +44,7 @@ export function Header() {
               </Link>
             ))}
           </nav>
+          <HeaderNav />
         </div>
 
         <div className="flex items-center gap-5 lg:gap-8">

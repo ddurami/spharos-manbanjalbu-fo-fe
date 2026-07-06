@@ -48,7 +48,7 @@ export function BestProductCard({ product }: BestProductCardProps) {
           {product.name}
         </h3>
         <p className="mt-1 text-[16px] font-bold text-[#121212]">
-          {formatPrice(product.price)}
+          {formatPrice(product.price)}원
         </p>
       </div>
     </article>
