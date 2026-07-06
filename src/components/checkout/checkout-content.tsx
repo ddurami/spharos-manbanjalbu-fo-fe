@@ -7,7 +7,7 @@ import { CheckoutActionBar } from "@/components/checkout/checkout-action-bar";
 import { DiscountSection } from "@/components/checkout/discount-section";
 import { OrderSection } from "@/components/checkout/order-section";
 import { PaymentMethodSection } from "@/components/checkout/payment-method-section";
-import { PriceSummarySidebar } from "@/components/checkout/price-summary-sidebar";
+import { PriceSummarySidebar } from "@/components/common/price-summary-sidebar";
 import { AddressSection } from "@/components/checkout/address-section";
 import { calculateCheckoutSummary } from "@/lib/checkout/calculate-summary";
 import { CHECKOUT_ACTION_BAR_HEIGHT } from "@/lib/checkout/types";

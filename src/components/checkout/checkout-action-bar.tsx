@@ -1,4 +1,4 @@
-import { PriceDisplay } from "@/components/checkout/price-display";
+import { PriceDisplay } from "@/components/common/price-display";
 import { Button } from "@/components/ui/button";
 import {
   CHECKOUT_ACTION_BAR_HEIGHT,
