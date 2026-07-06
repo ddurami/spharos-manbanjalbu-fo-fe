@@ -46,9 +46,14 @@ export function CheckoutContent() {
   return (
     <div className="flex flex-1 flex-col">
       <div
-        className="mx-auto flex w-full max-w-[1920px] flex-1 flex-col gap-[50px] px-[50px] lg:flex-row lg:items-start lg:px-[300px]"
+        className="mx-auto flex w-full max-w-[1920px] flex-1 flex-col gap-[50px] px-[50px] pt-[50px] lg:px-[300px]"
         style={{ paddingBottom: CHECKOUT_ACTION_BAR_HEIGHT }}
       >
+        <h1 className="w-full max-w-[850px] text-[36px] font-medium text-foreground">
+          결제하기
+        </h1>
+
+        <div className="flex flex-1 flex-col gap-[50px] lg:flex-row lg:items-start">
         <div className="flex w-full max-w-[850px] flex-col gap-[50px]">
           <AddressSection address={address} />
           <OrderSection
@@ -64,6 +69,7 @@ export function CheckoutContent() {
         </div>
 
         <PriceSummarySidebar summary={summary} />
+        </div>
       </div>
 
       <CheckoutActionBar summary={summary} />
