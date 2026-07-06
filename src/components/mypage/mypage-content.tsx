@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { MypageMenuList } from "@/components/mypage/mypage-menu-list";
-import { MypageOrderStatus } from "@/components/mypage/mypage-order-status";
+import { MypagePersonalInfoLink } from "@/components/mypage/mypage-personal-info-link";
 import { MypageSectionCard } from "@/components/mypage/mypage-section-card";
 import { MypageWelcome } from "@/components/mypage/mypage-welcome";
 import { useAuth } from "@/contexts/auth-context";
@@ -37,23 +37,16 @@ export function MypageContent() {
       <div className="flex flex-col gap-10 lg:gap-12">
         <MypageWelcome name={member.name} />
 
-        <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
           <div className="flex flex-col gap-6">
-            <MypageSectionCard id="order-status" title="주문/배송현황">
-              <MypageOrderStatus />
-            </MypageSectionCard>
+            <MypagePersonalInfoLink />
 
-            <MypageSectionCard id="shopping-info" title="쇼핑정보">
+            <MypageSectionCard title="쇼핑정보">
               <MypageMenuList items={SHOPPING_MENU_ITEMS} />
             </MypageSectionCard>
           </div>
 
-          <MypageSectionCard
-            id="payment-methods"
-            title="결제수단"
-            className="lg:h-full"
-            contentClassName="lg:pb-2"
-          >
+          <MypageSectionCard title="결제수단" className="h-full">
             <MypageMenuList items={PAYMENT_MENU_ITEMS} />
           </MypageSectionCard>
         </div>

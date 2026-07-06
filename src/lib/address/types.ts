@@ -9,6 +9,11 @@ export type Address = {
   deliveryMemo: string;
 };
 
+export type StoredAddress = Address & {
+  id: string;
+  isDefault: boolean;
+};
+
 export const EMPTY_ADDRESS: Address = {
   nickname: "",
   recipient: "",
