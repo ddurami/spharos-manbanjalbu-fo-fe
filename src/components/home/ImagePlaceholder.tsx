@@ -50,7 +50,7 @@ export function ImagePlaceholder({
         fill
         priority={priority}
         className={cn("object-cover", roundedClass, className)}
-        sizes="(max-width: 768px) 100vw, 1320px"
+        sizes={`(max-width: 768px) 100vw, ${LAYOUT.contentMaxWidth}px`}
       />
     );
   }

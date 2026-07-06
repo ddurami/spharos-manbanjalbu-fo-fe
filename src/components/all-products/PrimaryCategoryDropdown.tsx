@@ -41,7 +41,7 @@ export function PrimaryCategoryDropdown({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="inline-flex h-[30px] items-center gap-2"
+        className="inline-flex h-[30px] items-center gap-2 transition-opacity hover:opacity-60"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label="1차 카테고리 선택"

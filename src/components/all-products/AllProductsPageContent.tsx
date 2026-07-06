@@ -78,7 +78,7 @@ export function AllProductsPageContent() {
   }, [primaryCategory, subCategory, selectedSort]);
 
   return (
-    <main className="py-10">
+    <div className="py-10">
       <PageContainer>
         <PrimaryCategoryDropdown
           selectedCategory={primaryCategory}
@@ -116,6 +116,6 @@ export function AllProductsPageContent() {
           <BestProductGrid products={filteredProducts} />
         </div>
       </PageContainer>
-    </main>
+    </div>
   );
 }

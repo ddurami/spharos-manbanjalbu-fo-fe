@@ -7,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AllProductsPage() {
-  return (
-    <div className="min-h-full bg-white">
-      <AllProductsPageContent />
-    </div>
-  );
+  return <AllProductsPageContent />;
 }
