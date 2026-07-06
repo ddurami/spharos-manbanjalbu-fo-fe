@@ -18,12 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AddressPostcodeLayer } from "@/components/address/address-postcode-layer";
 import {
   getSelectedAddress,
-  openDaumPostcode,
+  type DaumPostcodeResult,
 } from "@/lib/address/daum-postcode";
 import { DELIVERY_MEMO_OPTIONS } from "@/lib/address/delivery-memo-options";
-import { getAddress, saveAddress } from "@/lib/address/storage";
+import { addStoredAddress, getAddress, getAddressById, getStoredAddresses, saveAddress, updateStoredAddress } from "@/lib/address/storage";
 import { EMPTY_ADDRESS, type Address } from "@/lib/address/types";
 import {
   hasValidationErrors,
@@ -37,22 +38,74 @@ const outlineButtonClassName =
 const addressSearchButtonClassName =
   "mb-2 h-10 shrink-0 rounded-full border-[1.5px] border-primary px-5 text-[17px] tracking-tight text-primary hover:bg-sb-green-soft hover:text-primary";
 
-export function AddressForm() {
+function normalizePhoneInput(value: string): string {
+  return value.replace(/\D/g, "").slice(0, 11);
+}
+
+type AddressFormProps = {
+  addressId?: string;
+  redirectHref?: string;
+  cancelHref?: string;
+};
+
+export function AddressForm({
+  addressId,
+  redirectHref = "/checkout",
+  cancelHref = "/checkout",
+}: AddressFormProps) {
   const router = useRouter();
   const addressDetailRef = useRef<HTMLInputElement>(null);
+  const isMypageForm = redirectHref.startsWith("/mypage");
   const [form, setForm] = useState<Address>(EMPTY_ADDRESS);
+  const [isDefault, setIsDefault] = useState(false);
+  const [isDefaultLocked, setIsDefaultLocked] = useState(false);
   const [errors, setErrors] = useState<AddressErrors>({});
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
   const [addressSearchError, setAddressSearchError] = useState<string | null>(
     null
   );
 
   useEffect(() => {
-    const saved = getAddress();
-    if (saved) {
-      setForm(saved);
+    if (addressId) {
+      const saved = getAddressById(addressId);
+      if (saved) {
+        setForm({
+          nickname: saved.nickname,
+          recipient: saved.recipient,
+          zipCode: saved.zipCode,
+          address: saved.address,
+          addressDetail: saved.addressDetail,
+          phone1: normalizePhoneInput(saved.phone1),
+          phone2: normalizePhoneInput(saved.phone2),
+          deliveryMemo: saved.deliveryMemo,
+        });
+
+        if (isMypageForm) {
+          setIsDefault(saved.isDefault);
+          setIsDefaultLocked(saved.isDefault);
+        }
+      }
+      return;
     }
-  }, []);
+
+    if (isMypageForm) {
+      const isFirstAddress = getStoredAddresses().length === 0;
+      setIsDefault(isFirstAddress);
+      setIsDefaultLocked(isFirstAddress);
+    }
+
+    if (redirectHref === "/checkout") {
+      const saved = getAddress();
+      if (saved) {
+        setForm({
+          ...saved,
+          phone1: normalizePhoneInput(saved.phone1),
+          phone2: normalizePhoneInput(saved.phone2),
+        });
+      }
+    }
+  }, [addressId, redirectHref, isMypageForm]);
 
   const updateField = <K extends keyof Address>(key: K, value: Address[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -67,39 +120,51 @@ export function AddressForm() {
     });
   };
 
-  const handleAddressSearch = async () => {
+  const applyPostcodeResult = (result: DaumPostcodeResult) => {
+    const address = getSelectedAddress(result);
+
+    setForm((current) => ({
+      ...current,
+      zipCode: result.zonecode,
+      address,
+      addressDetail: "",
+    }));
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.zipCode;
+      delete next.address;
+      delete next.addressDetail;
+      return next;
+    });
+    setAddressSearchError(null);
+
+    requestAnimationFrame(() => {
+      addressDetailRef.current?.focus();
+    });
+  };
+
+  const handleAddressSearch = () => {
     setAddressSearchError(null);
     setIsSearchingAddress(true);
+    setIsPostcodeOpen(true);
+  };
 
-    try {
-      await openDaumPostcode((result) => {
-        const address = getSelectedAddress(result);
+  const handlePostcodeClose = () => {
+    setIsPostcodeOpen(false);
+    setIsSearchingAddress(false);
+  };
 
-        setForm((current) => ({
-          ...current,
-          zipCode: result.zonecode,
-          address,
-          addressDetail: "",
-        }));
-        setErrors((current) => {
-          const next = { ...current };
-          delete next.zipCode;
-          delete next.address;
-          delete next.addressDetail;
-          return next;
-        });
+  const handlePostcodeComplete = (result: DaumPostcodeResult) => {
+    applyPostcodeResult(result);
+    setIsPostcodeOpen(false);
+    setIsSearchingAddress(false);
+  };
 
-        requestAnimationFrame(() => {
-          addressDetailRef.current?.focus();
-        });
-      });
-    } catch {
-      setAddressSearchError(
-        "주소검색 서비스를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
-      );
-    } finally {
-      setIsSearchingAddress(false);
-    }
+  const handlePostcodeError = () => {
+    setAddressSearchError(
+      "주소검색 서비스를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    );
+    setIsSearchingAddress(false);
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -112,12 +177,29 @@ export function AddressForm() {
       return;
     }
 
-    saveAddress(form);
-    router.push("/checkout");
+    if (addressId) {
+      updateStoredAddress(addressId, form, {
+        setAsDefault: isMypageForm && isDefault,
+      });
+    } else if (isMypageForm) {
+      addStoredAddress(form, { setAsDefault: isDefault });
+    } else {
+      saveAddress(form);
+    }
+
+    router.push(redirectHref);
   };
 
   return (
-    <form
+    <>
+      <AddressPostcodeLayer
+        open={isPostcodeOpen}
+        onClose={handlePostcodeClose}
+        onComplete={handlePostcodeComplete}
+        onError={handlePostcodeError}
+      />
+
+      <form
       className="flex w-full flex-col gap-10"
       noValidate
       onSubmit={handleSubmit}
@@ -220,8 +302,10 @@ export function AddressForm() {
           inputMode="tel"
           autoComplete="tel"
           value={form.phone1}
-          onChange={(event) => updateField("phone1", event.target.value)}
-          placeholder="010-1234-5678"
+          onChange={(event) =>
+            updateField("phone1", normalizePhoneInput(event.target.value))
+          }
+          placeholder="01012345678"
           className={underlineInputClassName}
           aria-invalid={Boolean(errors.phone1)}
         />
@@ -234,8 +318,10 @@ export function AddressForm() {
           inputMode="tel"
           autoComplete="tel"
           value={form.phone2}
-          onChange={(event) => updateField("phone2", event.target.value)}
-          placeholder="010-1234-5678"
+          onChange={(event) =>
+            updateField("phone2", normalizePhoneInput(event.target.value))
+          }
+          placeholder="01012345678"
           className={underlineInputClassName}
           aria-invalid={Boolean(errors.phone2)}
         />
@@ -262,8 +348,21 @@ export function AddressForm() {
         </Select>
       </AddressField>
 
+      {isMypageForm ? (
+        <label className="flex items-center gap-3 text-base text-foreground">
+          <input
+            type="checkbox"
+            checked={isDefault}
+            disabled={isDefaultLocked}
+            onChange={(event) => setIsDefault(event.target.checked)}
+            className="size-4 accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          기본 배송지로 설정
+        </label>
+      ) : null}
+
       <div className="flex items-center justify-end gap-3 pt-2">
-        <Link href="/checkout">
+        <Link href={cancelHref}>
           <Button
             type="button"
             variant="outline"
@@ -277,5 +376,6 @@ export function AddressForm() {
         </Button>
       </div>
     </form>
+    </>
   );
 }

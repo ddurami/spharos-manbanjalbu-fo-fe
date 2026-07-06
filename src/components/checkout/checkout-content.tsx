@@ -24,9 +24,20 @@ export function CheckoutContent() {
   const [address, setAddress] = useState<Address | null>(null);
 
   useEffect(() => {
-    if (pathname === "/checkout") {
-      setAddress(getAddress());
+    if (pathname !== "/checkout") {
+      return;
     }
+
+    const loadAddress = () => {
+      setAddress(getAddress());
+    };
+
+    loadAddress();
+    window.addEventListener("focus", loadAddress);
+
+    return () => {
+      window.removeEventListener("focus", loadAddress);
+    };
   }, [pathname]);
 
   const summary = useMemo(() => calculateCheckoutSummary(items), [items]);
