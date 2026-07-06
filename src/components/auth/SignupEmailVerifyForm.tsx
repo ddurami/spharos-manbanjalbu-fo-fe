@@ -4,7 +4,7 @@
 
 import { useRouter } from "next/navigation";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { SignupStepIndicator } from "@/components/auth/SignupStepIndicator";
 
@@ -19,122 +19,56 @@ import {
 } from "@/lib/api/member";
 
 import { updateSignupSession } from "@/lib/signup-session";
+import {
+  formatVerificationTimer,
+  useVerificationCountdown,
+  VERIFICATION_TIMER_SECONDS,
+} from "@/lib/use-verification-countdown";
+import type { VerificationConfirmResponse } from "@/types/member";
 
 
 
 const CODE_LENGTH = 6;
 
-const TIMER_SECONDS = 5 * 60;
-
 
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-
-
-function formatTimer(seconds: number) {
-
-  const minutes = Math.floor(seconds / 60);
-
-  const remainingSeconds = seconds % 60;
-
-  return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
-
-}
-
-
-
 function validateEmail(email: string) {
-
   const trimmed = email.trim();
 
-
-
   if (!trimmed) {
-
     return "이메일 주소를 입력해 주세요.";
-
   }
-
-
 
   if (!EMAIL_PATTERN.test(trimmed)) {
-
     return "올바른 이메일 형식으로 입력해 주세요.";
-
   }
 
-
-
   return null;
-
 }
 
+type SignupEmailVerifyFormProps = {
+  onVerified?: (result: VerificationConfirmResponse) => Promise<void> | void;
+};
 
-
-export function SignupEmailVerifyForm() {
-
+export function SignupEmailVerifyForm({
+  onVerified,
+}: SignupEmailVerifyFormProps = {}) {
   const router = useRouter();
-
   const [email, setEmail] = useState("");
-
   const [emailError, setEmailError] = useState<string | null>(null);
-
   const [codeError, setCodeError] = useState<string | null>(null);
-
   const [isCodeSent, setIsCodeSent] = useState(false);
-
   const [isSending, setIsSending] = useState(false);
-
   const [isVerifying, setIsVerifying] = useState(false);
-
-  const [remainingSeconds, setRemainingSeconds] = useState(0);
-
   const [sendCount, setSendCount] = useState(0);
-
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(""));
-
   const codeInputRefs = useRef<Array<HTMLInputElement | null>>([]);
-
-
-
-  useEffect(() => {
-
-    if (!isCodeSent || sendCount === 0) {
-
-      return;
-
-    }
-
-
-
-    setRemainingSeconds(TIMER_SECONDS);
-
-
-
-    const timerId = window.setInterval(() => {
-
-      setRemainingSeconds((prev) => {
-
-        if (prev <= 1) {
-
-          window.clearInterval(timerId);
-
-          return 0;
-
-        }
-
-        return prev - 1;
-
-      });
-
-    }, 1000);
-
-
-
-    return () => window.clearInterval(timerId);
-
-  }, [isCodeSent, sendCount]);
+  const { remainingSeconds, isTimerActive } = useVerificationCountdown(
+    isCodeSent ? sendCount : 0,
+    VERIFICATION_TIMER_SECONDS,
+  );
 
 
 
@@ -305,17 +239,16 @@ export function SignupEmailVerifyForm() {
 
 
   async function handleNext() {
-
     if (!isCodeSent || isVerifying || code.some((digit) => !digit)) {
-
       return;
-
     }
 
-
+    if (!isTimerActive) {
+      setCodeError("인증 시간이 만료되었습니다. 인증코드를 재발송해 주세요.");
+      return;
+    }
 
     setCodeError(null);
-
     setIsVerifying(true);
 
 
@@ -332,19 +265,17 @@ export function SignupEmailVerifyForm() {
 
 
 
-      updateSignupSession({
-
-        email: result.verifiedValue,
-
-        verifyMethod: "email",
-
-        verificationToken: result.verificationToken,
-
-        verifiedValue: result.verifiedValue,
-
-      });
-
-      router.push("/signup/terms");
+      if (onVerified) {
+        await onVerified(result);
+      } else {
+        updateSignupSession({
+          email: result.verifiedValue,
+          verifyMethod: "email",
+          verificationToken: result.verificationToken,
+          verifiedValue: result.verifiedValue,
+        });
+        router.push("/signup/terms");
+      }
 
     } catch (verifyError) {
 
@@ -500,7 +431,7 @@ export function SignupEmailVerifyForm() {
 
             <span className="text-sm font-medium text-[#E75B5B]">
 
-              {formatTimer(remainingSeconds)}
+              {formatVerificationTimer(remainingSeconds)}
 
             </span>
 

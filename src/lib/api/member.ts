@@ -1,9 +1,11 @@
 import { apiRequest } from "@/lib/api/client";
 import type {
+  FindLoginIdResponse,
   LoginIdCheckResponse,
   MemberJoinCompleteResponse,
   MemberJoinRequest,
   MemberLoginResponse,
+  ResetPasswordResponse,
   TermAgreementItemRequest,
   TermsAgreementResponse,
   TermsResponse,
@@ -77,5 +79,26 @@ export function loginMember(loginId: string, password: string) {
   return apiRequest<MemberLoginResponse>("/api/member/login", {
     method: "POST",
     body: JSON.stringify({ loginId, password }),
+  });
+}
+
+export function findLoginId(verificationToken: string) {
+  return apiRequest<FindLoginIdResponse>("/api/member/find-id", {
+    method: "POST",
+    body: JSON.stringify({ verificationToken }),
+  });
+}
+
+export function verifyAccountForPasswordReset(verificationToken: string) {
+  return apiRequest<FindLoginIdResponse>("/api/member/find-password/verify", {
+    method: "POST",
+    body: JSON.stringify({ verificationToken }),
+  });
+}
+
+export function resetPassword(verificationToken: string, password: string) {
+  return apiRequest<ResetPasswordResponse>("/api/member/find-password/reset", {
+    method: "POST",
+    body: JSON.stringify({ verificationToken, password }),
   });
 }
