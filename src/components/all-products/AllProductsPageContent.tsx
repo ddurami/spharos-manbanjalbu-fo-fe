@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { PrimaryCategoryId, Product, SortOption } from "@/types/best";
-import { ALL_PRODUCTS, getSubCategories } from "@/constants/best-mock-data";
+import {
+  ALL_PRODUCTS,
+  ALL_SUB_CATEGORY_ID,
+  getSubCategories,
+} from "@/constants/best-mock-data";
 import { cn } from "@/lib/utils";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PrimaryCategoryDropdown } from "@/components/all-products/PrimaryCategoryDropdown";
@@ -63,7 +67,7 @@ export function AllProductsPageContent() {
         (product) => product.category === primaryCategory,
       );
 
-      if (subCategory) {
+      if (subCategory && subCategory !== ALL_SUB_CATEGORY_ID) {
         products = products.filter(
           (product) => product.subCategory === subCategory,
         );

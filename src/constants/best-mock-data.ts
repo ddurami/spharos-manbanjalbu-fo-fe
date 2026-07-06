@@ -70,10 +70,15 @@ export const SORT_OPTIONS: SortOptionItem[] = [
   { id: "price-desc", label: "높은 가격순" },
 ];
 
+export const ALL_SUB_CATEGORY_ID = "all";
+
 export function getSubCategories(
   primaryCategory: BestCategory,
 ): SubCategoryItem[] {
-  return SUB_CATEGORIES[primaryCategory];
+  return [
+    { id: ALL_SUB_CATEGORY_ID, label: "전체" },
+    ...SUB_CATEGORIES[primaryCategory],
+  ];
 }
 
 const PRODUCT_NAMES: Record<

@@ -41,15 +41,17 @@ export function PrimaryCategoryDropdown({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2 text-[30px] font-normal leading-none text-[#121212]"
+        className="inline-flex h-[30px] items-center gap-2"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-label="1차 카테고리 선택"
       >
-        {selectedLabel}
+        <span className="text-[30px] font-normal leading-[30px] text-[#121212]">
+          {selectedLabel}
+        </span>
         <ChevronDownIcon
           className={cn(
-            "size-5 text-[#6c6c6c] transition-transform duration-300",
+            "size-5 shrink-0 text-[#6c6c6c] transition-transform duration-300",
             isOpen && "rotate-180",
           )}
           aria-hidden
