@@ -20,7 +20,10 @@ interface PopularCategoriesProps {
 }
 
 const ROW_HEIGHT = POPULAR_CATEGORY.large.height;
-const NAV_WIDTH = 72;
+const IMAGE_TO_PREV_GAP = 30;
+const NAV_BUTTON_GAP = 4;
+const NAV_BUTTONS_WIDTH = 28 + NAV_BUTTON_GAP + 28;
+const NAV_WIDTH = IMAGE_TO_PREV_GAP + NAV_BUTTONS_WIDTH;
 
 function CategoryCard({
   category,
@@ -116,8 +119,12 @@ export function PopularCategories({ categories }: PopularCategoriesProps) {
           </Carousel>
 
           <div
-            className="absolute right-0 bottom-0 flex items-end gap-1"
-            style={{ width: NAV_WIDTH, height: POPULAR_CATEGORY.small.height }}
+            className="absolute right-0 bottom-0 flex items-end"
+            style={{
+              width: NAV_BUTTONS_WIDTH,
+              height: POPULAR_CATEGORY.small.height,
+              gap: NAV_BUTTON_GAP,
+            }}
           >
             <Button
               type="button"
