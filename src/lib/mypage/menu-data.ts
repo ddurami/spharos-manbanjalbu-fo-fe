@@ -11,7 +11,7 @@ export const SHOPPING_MENU_ITEMS: MypageMenuItem[] = [
   { label: "주문내역", href: "#", icon: FileText },
   { label: "주문 취소 내역", href: "#", icon: FileText },
   { label: "배송 예약 내역", href: "#", icon: FileText },
-  { label: "배송지 관리", href: "/mypage/address", icon: Truck },
+  { label: "배송지 관리", href: "/checkout/address", icon: Truck },
 ];
 
 export const PAYMENT_MENU_ITEMS: MypageMenuItem[] = [
