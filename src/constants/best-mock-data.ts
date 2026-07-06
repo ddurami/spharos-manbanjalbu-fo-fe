@@ -128,3 +128,4 @@ function createProducts(): BestProduct[] {
 }
 
 export const BEST_PRODUCTS = createProducts();
+export const ALL_PRODUCTS = BEST_PRODUCTS;
