@@ -1,9 +1,7 @@
 "use client";
 
-
-
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-
 import { useRef, useState } from "react";
 
 import { SignupStepIndicator } from "@/components/auth/SignupStepIndicator";
@@ -319,8 +317,26 @@ export function SignupEmailVerifyForm({
 
 
 
-      <div className="mt-10">
+      <div className="relative mt-10">
+        {isSending && (
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/80"
+            aria-live="polite"
+            aria-busy="true"
+          >
+            <div className="flex flex-col items-center gap-3 px-4 text-center">
+              <Loader2
+                className="size-8 animate-spin text-[#00704A]"
+                aria-hidden
+              />
+              <p className="text-sm text-[#666]">
+                인증코드를 발송하고 있습니다...
+              </p>
+            </div>
+          </div>
+        )}
 
+        <div>
         {isCodeSent && (
 
           <p className="mb-4 text-sm leading-5 text-[#888]">
@@ -380,27 +396,19 @@ export function SignupEmailVerifyForm({
 
 
           <button
-
             type="button"
-
             onClick={handleSendCode}
-
             disabled={isSending}
-
-            className="shrink-0 rounded-full border border-[#00704A] px-4 py-2 text-sm font-medium whitespace-nowrap text-[#00704A] transition-colors hover:bg-[#00704A]/5 disabled:cursor-not-allowed disabled:opacity-50"
-
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-[#00704A] px-4 py-2 text-sm font-medium whitespace-nowrap text-[#00704A] transition-colors hover:bg-[#00704A]/5 disabled:cursor-not-allowed disabled:opacity-50"
           >
-
+            {isSending && (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            )}
             {isSending
-
               ? "발송 중..."
-
               : isCodeSent
-
                 ? "인증코드 재발송"
-
                 : "인증코드 발송"}
-
           </button>
 
         </div>
@@ -416,12 +424,9 @@ export function SignupEmailVerifyForm({
           </p>
 
         )}
+        </div>
 
-      </div>
-
-
-
-      <div className="mt-10">
+        <div className="mt-10">
 
         <div className="flex items-center justify-between">
 
@@ -492,10 +497,8 @@ export function SignupEmailVerifyForm({
           </p>
 
         )}
-
+        </div>
       </div>
-
-
 
       <button
 

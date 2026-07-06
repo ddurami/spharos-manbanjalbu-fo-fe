@@ -9,7 +9,7 @@ type MypageMenuListProps = {
 export function MypageMenuList({ items }: MypageMenuListProps) {
   return (
     <ul className="flex flex-col">
-      {items.map(({ label, href, icon: Icon }) => (
+      {items.map(({ label, href, icon: Icon, count, summary }) => (
         <li key={label}>
           <Link
             href={href}
@@ -19,7 +19,16 @@ export function MypageMenuList({ items }: MypageMenuListProps) {
               className="size-5 shrink-0 text-sb-text-subtle"
               strokeWidth={1.5}
             />
-            <span>{label}</span>
+            <span className="min-w-0 flex-1">{label}</span>
+            {(count != null || summary) && (
+              <span className="shrink-0 max-w-[50%] text-right text-sm text-sb-text-subtle">
+                {count != null && (
+                  <span>{label === "쿠폰" ? `${count}장` : `${count}건`}</span>
+                )}
+                {count != null && summary ? " · " : null}
+                {summary}
+              </span>
+            )}
           </Link>
         </li>
       ))}
