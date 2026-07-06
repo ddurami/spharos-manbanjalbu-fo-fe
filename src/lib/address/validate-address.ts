@@ -2,10 +2,10 @@ import type { Address } from "@/lib/address/types";
 
 export type AddressErrors = Partial<Record<keyof Address, string>>;
 
-const PHONE_PATTERN = /^01[0-9]-?\d{3,4}-?\d{4}$/;
+const PHONE_PATTERN = /^01[0-9]{8,9}$/;
 
 function isValidPhone(value: string): boolean {
-  return PHONE_PATTERN.test(value.replace(/\s/g, ""));
+  return PHONE_PATTERN.test(value.replace(/\D/g, ""));
 }
 
 export function validateAddress(address: Address): AddressErrors {
@@ -32,11 +32,11 @@ export function validateAddress(address: Address): AddressErrors {
   if (!address.phone1.trim()) {
     errors.phone1 = "연락처를 입력해 주세요.";
   } else if (!isValidPhone(address.phone1)) {
-    errors.phone1 = "올바른 휴대폰 번호를 입력해 주세요. (예: 010-1234-5678)";
+    errors.phone1 = "올바른 휴대폰 번호를 입력해 주세요. (예: 01012345678)";
   }
 
   if (address.phone2.trim() && !isValidPhone(address.phone2)) {
-    errors.phone2 = "올바른 휴대폰 번호를 입력해 주세요. (예: 010-1234-5678)";
+    errors.phone2 = "올바른 휴대폰 번호를 입력해 주세요. (예: 01012345678)";
   }
 
   return errors;

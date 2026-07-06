@@ -8,17 +8,23 @@ declare namespace daum {
 
   interface PostcodeOptions {
     oncomplete: (data: PostcodeData) => void;
+    onclose?: (state: "FORCE_CLOSE" | "COMPLETE_CLOSE") => void;
+    width?: string | number;
+    height?: string | number;
   }
 
   class Postcode {
     constructor(options: PostcodeOptions);
     open(): void;
+    embed(element: HTMLElement): void;
   }
 }
 
 declare global {
   interface Window {
-    daum?: typeof daum;
+    daum?: {
+      Postcode: typeof daum.Postcode;
+    };
   }
 }
 
