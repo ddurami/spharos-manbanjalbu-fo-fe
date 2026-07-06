@@ -35,9 +35,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [member, setMember] = useState<StoredMember | null>(null);
 
   useEffect(() => {
-    setIsLoggedIn(localStorage.getItem(AUTH_STORAGE_KEY) === "true");
-    setAccessToken(localStorage.getItem(ACCESS_TOKEN_KEY));
+    const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const storedAuthFlag = localStorage.getItem(AUTH_STORAGE_KEY) === "true";
     const storedMember = localStorage.getItem(MEMBER_STORAGE_KEY);
+
+    setAccessToken(storedToken);
+    setIsLoggedIn(storedAuthFlag && Boolean(storedToken));
 
     if (storedMember) {
       try {
@@ -45,6 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         localStorage.removeItem(MEMBER_STORAGE_KEY);
       }
+    }
+
+    if (storedAuthFlag && !storedToken) {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
     }
   }, []);
 

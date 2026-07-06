@@ -41,6 +41,14 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-sb-green: var(--sb-green);
+  --color-sb-green-soft: var(--sb-green-soft);
+  --color-sb-text-secondary: var(--sb-text-secondary);
+  --color-sb-text-muted: var(--sb-text-muted);
+  --color-sb-text-subtle: var(--sb-text-subtle);
+  --color-sb-border: var(--sb-border);
+  --color-sb-surface: var(--sb-surface);
+  --color-sb-warning: var(--sb-warning);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -51,24 +59,34 @@
 }
 
 :root {
+  /* Starbucks brand tokens (Figma sb_rebuilding_design) */
+  --sb-green: #00a864;
+  --sb-green-soft: #f2faf7;
+  --sb-text-secondary: #464646;
+  --sb-text-muted: #979797;
+  --sb-text-subtle: #6c6c6c;
+  --sb-border: #d9d9d9;
+  --sb-surface: #f7f7f7;
+  --sb-warning: #e75b52;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --primary: oklch(0.627 0.154 156.5);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.977 0 0);
+  --secondary-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.977 0 0);
+  --muted-foreground: oklch(0.512 0 0);
+  --accent: oklch(0.976 0.014 165);
+  --accent-foreground: oklch(0.627 0.154 156.5);
+  --destructive: oklch(0.628 0.195 25.5);
+  --border: oklch(0.885 0 0);
+  --input: oklch(0.885 0 0);
+  --ring: oklch(0.627 0.154 156.5);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -77,8 +95,8 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.627 0.154 156.5);
+  --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);

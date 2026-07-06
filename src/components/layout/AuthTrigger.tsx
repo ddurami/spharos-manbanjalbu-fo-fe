@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
 
@@ -10,20 +11,28 @@ type AuthTriggerProps = {
 };
 
 export function AuthTrigger({ className }: AuthTriggerProps) {
-  const { isLoggedIn } = useAuth();
+  const router = useRouter();
+  const { isLoggedIn, logout } = useAuth();
 
   if (isLoggedIn) {
     return (
-      <Link href="/mypage" className={cn(className)}>
-        <span>My Page</span>
+      <button
+        type="button"
+        onClick={() => {
+          logout();
+          router.push("/");
+        }}
+        className={cn(className)}
+      >
+        <span>Log Out</span>
         <Image
-          src="/images/icon-profile.png"
+          src="/images/icon-logout.png"
           alt=""
           width={24}
           height={24}
           aria-hidden
         />
-      </Link>
+      </button>
     );
   }
 
@@ -31,7 +40,7 @@ export function AuthTrigger({ className }: AuthTriggerProps) {
     <Link href="/login" className={cn(className)}>
       <span>Log In</span>
       <Image
-        src="/images/icon-login.png"
+        src="/images/icon-login-profile.png"
         alt=""
         width={24}
         height={24}
