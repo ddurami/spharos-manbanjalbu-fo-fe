@@ -55,7 +55,7 @@ export function AddressSection({ address }: AddressSectionProps) {
           </p>
         )}
 
-        <Link href="/checkout/address">
+        <Link href={hasAddress ? "/mypage/address" : "/mypage/address/new"}>
           <Button variant="outline" className={outlineButtonClassName}>
             {hasAddress ? "배송지 변경" : "배송지 등록"}
           </Button>

@@ -8,3 +8,7 @@ export function getDeliveryMemoLabel(value: string): string | undefined {
 export function formatAddressLine(address: Address): string {
   return `[${address.zipCode}] ${address.address} ${address.addressDetail}`.trim();
 }
+
+export function formatAddressListLine(address: Address): string {
+  return `(${address.zipCode}) ${address.address} ${address.addressDetail}`.trim();
+}
