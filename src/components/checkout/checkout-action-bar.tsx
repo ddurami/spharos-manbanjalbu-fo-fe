@@ -9,15 +9,22 @@ import { cn } from "@/lib/utils";
 type CheckoutActionBarProps = {
   summary: CheckoutSummary;
   hasAddress: boolean;
+  isSubmitting?: boolean;
+  purchaseError?: string | null;
+  onPurchase?: () => void;
   className?: string;
 };
 
 export function CheckoutActionBar({
   summary,
   hasAddress,
+  isSubmitting = false,
+  purchaseError,
+  onPurchase,
   className,
 }: CheckoutActionBarProps) {
-  const canPurchase = summary.itemCount > 0 && hasAddress;
+  const canPurchase =
+    summary.itemCount > 0 && hasAddress && !isSubmitting;
 
   return (
     <div
@@ -47,15 +54,19 @@ export function CheckoutActionBar({
             위 주문 내용을 확인하였으며, 결제에 동의합니다. (전자상거래법 8조
             2항)
           </p>
+          {purchaseError ? (
+            <p className="text-sm text-destructive">{purchaseError}</p>
+          ) : null}
         </div>
 
         <div className="flex w-full max-w-[440px] items-center justify-end lg:ml-auto">
           <Button
             type="button"
             disabled={!canPurchase}
+            onClick={onPurchase}
             className="h-14 w-full max-w-[210px] rounded-full text-[17px]"
           >
-            구매하기
+            {isSubmitting ? "주문 처리 중..." : "구매하기"}
           </Button>
         </div>
       </div>
