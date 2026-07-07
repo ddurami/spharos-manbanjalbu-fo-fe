@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AuthTrigger } from "@/components/layout/AuthTrigger";
 import { HeaderNav } from "@/components/layout/HeaderNav";
+import { cn } from "@/lib/utils";
 
 const UTILITY_ITEMS = [
   { label: "Search", href: "/search", icon: "/images/icon-search.png" },
@@ -11,9 +12,14 @@ const UTILITY_ITEMS = [
 const utilityLinkClassName =
   "flex items-center gap-1.5 text-sm font-medium tracking-wide text-black transition-opacity hover:opacity-60";
 
-export function Header() {
+export function Header({ className }: { className?: string }) {
   return (
-    <header className="sticky top-0 z-50 border-b border-black/5 bg-white">
+    <header
+      className={cn(
+        "sticky top-0 z-50 shrink-0 border-b border-black/5 bg-white",
+        className,
+      )}
+    >
       <div className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between px-6 lg:px-10">
         <div className="flex items-center gap-10 lg:gap-14">
           <Link href="/" className="shrink-0" aria-label="스타벅스 홈">
