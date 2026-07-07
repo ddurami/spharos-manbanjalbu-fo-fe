@@ -45,7 +45,7 @@ export async function apiRequest<T>(
     throw new ApiError("서버 응답을 처리할 수 없습니다.", response.status);
   }
 
-  if (!response.ok || !body.success || body.data == null) {
+  if (!response.ok || !body.success) {
     throw new ApiError(
       body.message ?? "요청 처리 중 오류가 발생했습니다.",
       response.status,
