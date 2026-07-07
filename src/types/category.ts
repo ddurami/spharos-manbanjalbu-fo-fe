@@ -8,6 +8,8 @@ export type Category = {
   id: number;
   name: string;
   displayOrder: number;
+  imageUrl: string;
+  hasCapacityFilter: boolean;
   subcategories: Subcategory[];
 };
 

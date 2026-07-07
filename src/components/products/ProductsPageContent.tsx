@@ -17,7 +17,7 @@ import type { Category, Season } from "@/types/category";
 
 const PAGE_SIZE = 30;
 
-const CAPACITY_OPTIONS = ["SHORT", "TALL", "GRANDE", "VENTI"];
+const CAPACITY_OPTIONS = ["SHORT", "TALL", "GRANDE", "VENTI", "TRENTA"];
 
 export function ProductsPageContent() {
   const searchParams = useSearchParams();
@@ -139,8 +139,10 @@ export function ProductsPageContent() {
     );
   };
 
-  const availableCapacities =
-    selectedCategoryId != null ? CAPACITY_OPTIONS : [];
+  const selectedCategory = categories.find((c) => c.id === selectedCategoryId);
+  const availableCapacities = selectedCategory?.hasCapacityFilter
+    ? CAPACITY_OPTIONS
+    : [];
 
   const pageTitle = keyword ? `"${keyword}" 검색 결과` : "전체상품";
 

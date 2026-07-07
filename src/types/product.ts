@@ -39,7 +39,6 @@ export type ProductDetail = {
   capacity: string | null;
   isBest: boolean;
   isNew: boolean;
-  categoryId: number | null;
   categoryName: string;
   seasonName: string | null;
   mediaList: ProductMedia[];

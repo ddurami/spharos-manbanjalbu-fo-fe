@@ -73,17 +73,17 @@ export function EventPageContent() {
 
   return (
     <PageContainer className="py-8">
-      <h1 className="text-2xl font-bold text-[#121212]">EVENT</h1>
+      <h1 className="text-3xl font-bold text-[#121212]">EVENT</h1>
 
-      <div className="mt-6 flex flex-wrap items-center gap-2">
+      <div className="mt-6 flex items-center gap-1">
         <button
           type="button"
           onClick={() => setSelectedSeasonId(null)}
           className={cn(
-            "shrink-0 rounded-full border px-4 py-1.5 text-sm transition-colors",
+            "shrink-0 border-b-2 px-4 pb-2.5 text-lg font-medium transition-colors",
             selectedSeasonId === null
-              ? "border-sb-green bg-sb-green text-white"
-              : "border-sb-border text-sb-text-secondary hover:bg-sb-surface",
+              ? "border-sb-green text-sb-green"
+              : "border-transparent text-sb-text-muted hover:text-sb-text-secondary",
           )}
         >
           전체
@@ -94,10 +94,10 @@ export function EventPageContent() {
             type="button"
             onClick={() => setSelectedSeasonId(season.id)}
             className={cn(
-              "shrink-0 rounded-full border px-4 py-1.5 text-sm transition-colors",
+              "shrink-0 border-b-2 px-4 pb-2.5 text-lg font-medium transition-colors",
               selectedSeasonId === season.id
-                ? "border-sb-green bg-sb-green text-white"
-                : "border-sb-border text-sb-text-secondary hover:bg-sb-surface",
+                ? "border-sb-green text-sb-green"
+                : "border-transparent text-sb-text-muted hover:text-sb-text-secondary",
             )}
           >
             {season.name}

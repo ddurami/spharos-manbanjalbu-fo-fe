@@ -190,7 +190,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => executeSearch(item.label)}
+                    onClick={() => executeSearch(item.keyword)}
                     className="rounded-full bg-sb-green px-4 py-1.5 text-sm font-medium text-white hover:bg-[#009658]"
                   >
                     #{item.label}

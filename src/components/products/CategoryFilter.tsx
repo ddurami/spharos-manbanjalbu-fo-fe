@@ -191,7 +191,7 @@ export function CategoryFilter({
         </div>
       )}
 
-      <div className="flex items-center gap-1">
+      <div className="scrollbar-hide flex items-center gap-1 overflow-x-auto">
         <SeasonTab
           label="전체"
           active={selectedSeasonId === null}

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getProductDetail } from "@/lib/api/product";
+import { getCategories } from "@/lib/api/category";
 import { addRecentViewedItem } from "@/lib/recent-items/storage";
 import { PageContainer } from "@/components/common/PageContainer";
 import { ProductDetailHeader } from "@/components/product-detail/ProductDetailHeader";
@@ -9,6 +10,41 @@ import { ProductDetailTabs } from "@/components/product-detail/ProductDetailTabs
 import { ProductDetailImage } from "@/components/product-detail/ProductDetailImage";
 import { ProductGuideAccordion } from "@/components/product-detail/ProductGuideAccordion";
 import type { ProductDetail } from "@/types/product";
+import type { Category } from "@/types/category";
+
+export type CategoryBreadcrumb = {
+  parentId: number;
+  parentName: string;
+  childId: number | null;
+  childName: string | null;
+};
+
+function findCategoryBreadcrumb(
+  categories: Category[],
+  categoryName: string,
+): CategoryBreadcrumb | null {
+  for (const cat of categories) {
+    for (const sub of cat.subcategories) {
+      if (sub.name === categoryName) {
+        return {
+          parentId: cat.id,
+          parentName: cat.name,
+          childId: sub.id,
+          childName: sub.name,
+        };
+      }
+    }
+    if (cat.name === categoryName) {
+      return {
+        parentId: cat.id,
+        parentName: cat.name,
+        childId: null,
+        childName: null,
+      };
+    }
+  }
+  return null;
+}
 
 type ProductDetailPageContentProps = {
   productId: number;
@@ -18,28 +54,35 @@ export function ProductDetailPageContent({
   productId,
 }: ProductDetailPageContentProps) {
   const [product, setProduct] = useState<ProductDetail | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [activeTab, setActiveTab] = useState<"detail" | "guide">("detail");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsLoading(true);
-    getProductDetail(productId)
-      .then((data) => {
-        setProduct(data);
+    Promise.all([getProductDetail(productId), getCategories()])
+      .then(([productData, cats]) => {
+        setProduct(productData);
+        setCategories(cats);
 
         addRecentViewedItem({
-          productId: data.id,
-          name: data.name,
-          price: data.price,
+          productId: productData.id,
+          name: productData.name,
+          price: productData.price,
           thumbnailUrl:
-            data.mediaList.find((m) => m.isMain)?.mediaUrl ?? "",
-          isBest: data.isBest,
-          isNew: data.isNew,
+            productData.mediaList.find((m) => m.isMain)?.mediaUrl ?? "",
+          isBest: productData.isBest,
+          isNew: productData.isNew,
         });
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, [productId]);
+
+  const categoryBreadcrumb = useMemo(() => {
+    if (!product) return null;
+    return findCategoryBreadcrumb(categories, product.categoryName);
+  }, [product, categories]);
 
   if (isLoading) {
     return (
@@ -64,7 +107,11 @@ export function ProductDetailPageContent({
 
   return (
     <div className="py-8">
-      <ProductDetailHeader product={product} thumbnailUrl={thumbnail?.mediaUrl} />
+      <ProductDetailHeader
+        product={product}
+        thumbnailUrl={thumbnail?.mediaUrl}
+        categoryBreadcrumb={categoryBreadcrumb}
+      />
 
       <PageContainer className="mt-10">
         <ProductDetailTabs activeTab={activeTab} onChange={setActiveTab} />
