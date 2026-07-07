@@ -222,7 +222,10 @@ export function CartContent() {
         </div>
       </div>
 
-      <CartActionBar summary={summary} />
+      <CartActionBar
+        summary={summary}
+        selectedCartItemIds={Array.from(selectedIds)}
+      />
     </div>
   );
 }

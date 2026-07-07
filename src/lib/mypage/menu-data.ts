@@ -31,7 +31,7 @@ const SHOPPING_MENU_BASE = [
   {
     key: "deliveryAddress" as const,
     label: "배송지 관리",
-    href: "/checkout/address",
+    href: "/mypage/address",
     icon: Truck,
   },
 ] as const;

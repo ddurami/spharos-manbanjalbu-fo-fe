@@ -4,18 +4,25 @@ import Link from "next/link";
 
 import { PriceDisplay } from "@/components/common/price-display";
 import { Button } from "@/components/ui/button";
+import { buildCheckoutHref } from "@/lib/cart/checkout";
 import type { CheckoutSummary } from "@/lib/checkout/types";
 import { cn } from "@/lib/utils";
 
 type CartActionBarProps = {
   summary: CheckoutSummary;
+  selectedCartItemIds: number[];
   className?: string;
 };
 
 const ACTION_BAR_HEIGHT = 100;
 
-export function CartActionBar({ summary, className }: CartActionBarProps) {
+export function CartActionBar({
+  summary,
+  selectedCartItemIds,
+  className,
+}: CartActionBarProps) {
   const canPurchase = summary.itemCount > 0;
+  const checkoutHref = buildCheckoutHref(selectedCartItemIds);
 
   return (
     <div
@@ -42,16 +49,8 @@ export function CartActionBar({ summary, className }: CartActionBarProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={!canPurchase}
-            className="h-14 w-[160px] cursor-pointer rounded-full border-[1.5px] border-primary text-[17px] text-primary hover:bg-sb-green-soft hover:text-primary disabled:cursor-default disabled:border-sb-border disabled:text-sb-text-muted"
-          >
-            선물하기
-          </Button>
           {canPurchase ? (
-            <Link href="/checkout">
+            <Link href={checkoutHref}>
               <Button
                 type="button"
                 className="h-14 w-[160px] cursor-pointer rounded-full text-[17px]"

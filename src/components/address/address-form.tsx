@@ -24,7 +24,15 @@ import {
   type DaumPostcodeResult,
 } from "@/lib/address/daum-postcode";
 import { DELIVERY_MEMO_OPTIONS } from "@/lib/address/delivery-memo-options";
-import { addStoredAddress, getAddress, getAddressById, getStoredAddresses, saveAddress, updateStoredAddress } from "@/lib/address/storage";
+import {
+  createAddress,
+  fetchAddressById,
+  fetchAddresses,
+  fetchDefaultAddress,
+  saveCheckoutAddress,
+  updateAddress,
+} from "@/lib/address/address-service";
+import { ApiError } from "@/lib/api/client";
 import { EMPTY_ADDRESS, type Address } from "@/lib/address/types";
 import {
   hasValidationErrors,
@@ -65,46 +73,93 @@ export function AddressForm({
   const [addressSearchError, setAddressSearchError] = useState<string | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(Boolean(addressId));
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (addressId) {
-      const saved = getAddressById(addressId);
-      if (saved) {
-        setForm({
-          nickname: saved.nickname,
-          recipient: saved.recipient,
-          zipCode: saved.zipCode,
-          address: saved.address,
-          addressDetail: saved.addressDetail,
-          phone1: normalizePhoneInput(saved.phone1),
-          phone2: normalizePhoneInput(saved.phone2),
-          deliveryMemo: saved.deliveryMemo,
-        });
+    let cancelled = false;
 
-        if (isMypageForm) {
-          setIsDefault(saved.isDefault);
-          setIsDefaultLocked(saved.isDefault);
+    const loadForm = async () => {
+      if (addressId) {
+        setIsLoading(true);
+        try {
+          const saved = await fetchAddressById(addressId);
+          if (cancelled) {
+            return;
+          }
+
+          if (saved) {
+            setForm({
+              nickname: saved.nickname,
+              recipient: saved.recipient,
+              zipCode: saved.zipCode,
+              address: saved.address,
+              addressDetail: saved.addressDetail,
+              phone1: normalizePhoneInput(saved.phone1),
+              phone2: normalizePhoneInput(saved.phone2),
+              deliveryMemo: saved.deliveryMemo,
+            });
+
+            if (isMypageForm) {
+              setIsDefault(saved.isDefault);
+              setIsDefaultLocked(saved.isDefault);
+            }
+          }
+        } catch {
+          if (!cancelled) {
+            setSubmitError("배송지 정보를 불러오지 못했습니다.");
+          }
+        } finally {
+          if (!cancelled) {
+            setIsLoading(false);
+          }
+        }
+        return;
+      }
+
+      if (isMypageForm) {
+        try {
+          const addresses = await fetchAddresses();
+          if (cancelled) {
+            return;
+          }
+
+          const isFirstAddress = addresses.length === 0;
+          setIsDefault(isFirstAddress);
+          setIsDefaultLocked(isFirstAddress);
+        } catch {
+          if (!cancelled) {
+            setSubmitError("배송지 목록을 불러오지 못했습니다.");
+          }
         }
       }
-      return;
-    }
 
-    if (isMypageForm) {
-      const isFirstAddress = getStoredAddresses().length === 0;
-      setIsDefault(isFirstAddress);
-      setIsDefaultLocked(isFirstAddress);
-    }
+      if (redirectHref === "/checkout") {
+        try {
+          const saved = await fetchDefaultAddress();
+          if (cancelled || !saved) {
+            return;
+          }
 
-    if (redirectHref === "/checkout") {
-      const saved = getAddress();
-      if (saved) {
-        setForm({
-          ...saved,
-          phone1: normalizePhoneInput(saved.phone1),
-          phone2: normalizePhoneInput(saved.phone2),
-        });
+          setForm({
+            ...saved,
+            phone1: normalizePhoneInput(saved.phone1),
+            phone2: normalizePhoneInput(saved.phone2),
+          });
+        } catch {
+          if (!cancelled) {
+            setSubmitError("기본 배송지를 불러오지 못했습니다.");
+          }
+        }
       }
-    }
+    };
+
+    void loadForm();
+
+    return () => {
+      cancelled = true;
+    };
   }, [addressId, redirectHref, isMypageForm]);
 
   const updateField = <K extends keyof Address>(key: K, value: Address[K]) => {
@@ -167,8 +222,9 @@ export function AddressForm({
     setIsSearchingAddress(false);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSubmitError(null);
 
     const validationErrors = validateAddress(form);
     setErrors(validationErrors);
@@ -177,18 +233,36 @@ export function AddressForm({
       return;
     }
 
-    if (addressId) {
-      updateStoredAddress(addressId, form, {
-        setAsDefault: isMypageForm && isDefault,
-      });
-    } else if (isMypageForm) {
-      addStoredAddress(form, { setAsDefault: isDefault });
-    } else {
-      saveAddress(form);
-    }
+    setIsSubmitting(true);
 
-    router.push(redirectHref);
+    try {
+      if (addressId) {
+        await updateAddress(addressId, form, {
+          setAsDefault: isMypageForm && isDefault,
+        });
+      } else if (isMypageForm) {
+        await createAddress(form, { setAsDefault: isDefault });
+      } else {
+        await saveCheckoutAddress(form);
+      }
+
+      router.push(redirectHref);
+    } catch (error) {
+      setSubmitError(
+        error instanceof ApiError
+          ? error.message
+          : "배송지 저장 중 오류가 발생했습니다.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <p className="text-base text-sb-text-muted">배송지 정보를 불러오는 중...</p>
+    );
+  }
 
   return (
     <>
@@ -361,18 +435,29 @@ export function AddressForm({
         </label>
       ) : null}
 
+      {submitError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {submitError}
+        </p>
+      ) : null}
+
       <div className="flex items-center justify-end gap-3 pt-2">
         <Link href={cancelHref}>
           <Button
             type="button"
             variant="outline"
             className={outlineButtonClassName}
+            disabled={isSubmitting}
           >
             취소
           </Button>
         </Link>
-        <Button type="submit" className="h-14 rounded-full px-8 text-[17px]">
-          저장
+        <Button
+          type="submit"
+          className="h-14 rounded-full px-8 text-[17px]"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "저장 중..." : "저장"}
         </Button>
       </div>
     </form>

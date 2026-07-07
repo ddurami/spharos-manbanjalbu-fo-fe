@@ -8,11 +8,16 @@ import { cn } from "@/lib/utils";
 
 type CheckoutActionBarProps = {
   summary: CheckoutSummary;
+  hasAddress: boolean;
   className?: string;
 };
 
-export function CheckoutActionBar({ summary, className }: CheckoutActionBarProps) {
-  const canPurchase = summary.itemCount > 0;
+export function CheckoutActionBar({
+  summary,
+  hasAddress,
+  className,
+}: CheckoutActionBarProps) {
+  const canPurchase = summary.itemCount > 0 && hasAddress;
 
   return (
     <div
