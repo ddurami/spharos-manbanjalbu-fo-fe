@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
         hostname: "121.175.193.122",
         port: "8081",
       },
+      {
+        protocol: "https",
+        hostname: "image.istarbucks.co.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "*.amazonaws.com",
+      },
     ],
   },
 };

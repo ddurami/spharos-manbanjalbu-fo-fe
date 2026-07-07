@@ -13,15 +13,18 @@ import { ImagePlaceholder } from "@/components/common/ImagePlaceholder";
 import { ProductBadge } from "@/components/common/ProductBadge";
 import { CartAddedAlert } from "@/components/product-detail/CartAddedAlert";
 import type { ProductDetail } from "@/types/product";
+import type { CategoryBreadcrumb } from "@/components/product-detail/ProductDetailPageContent";
 
 type ProductDetailHeaderProps = {
   product: ProductDetail;
   thumbnailUrl?: string;
+  categoryBreadcrumb?: CategoryBreadcrumb | null;
 };
 
 export function ProductDetailHeader({
   product,
   thumbnailUrl,
+  categoryBreadcrumb,
 }: ProductDetailHeaderProps) {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
@@ -39,10 +42,12 @@ export function ProductDetailHeader({
     setIsAdding(true);
     try {
       await addCartItem(product.id, quantity);
+      window.dispatchEvent(new Event("cart-updated"));
       setIsCartAlertOpen(true);
     } catch (error) {
-      console.error("장바구니 추가 실패:", error);
-      alert("장바구니 추가에 실패했습니다.");
+      const message =
+        error instanceof Error ? error.message : "장바구니 추가에 실패했습니다.";
+      alert(message);
     } finally {
       setIsAdding(false);
     }
@@ -79,10 +84,18 @@ export function ProductDetailHeader({
 
         <div className="flex flex-1 flex-col py-2">
           <Link
-            href={product.categoryId ? `/products?categoryId=${product.categoryId}` : "/products"}
+            href={
+              categoryBreadcrumb?.childId
+                ? `/products?categoryId=${categoryBreadcrumb.parentId}&subcategoryId=${categoryBreadcrumb.childId}`
+                : categoryBreadcrumb
+                  ? `/products?categoryId=${categoryBreadcrumb.parentId}`
+                  : "/products"
+            }
             className="text-sm text-sb-text-muted hover:text-sb-green"
           >
-            {product.categoryName}
+            {categoryBreadcrumb?.childName
+              ? `${categoryBreadcrumb.parentName} > ${categoryBreadcrumb.childName}`
+              : categoryBreadcrumb?.parentName ?? product.categoryName}
           </Link>
 
           <div className="mt-1 flex items-start justify-between gap-4">

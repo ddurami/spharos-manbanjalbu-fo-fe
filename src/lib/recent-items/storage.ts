@@ -1,5 +1,6 @@
 const STORAGE_KEY = "recent-viewed-products";
 const MAX_DAYS = 14;
+const MAX_ITEMS = 20;
 
 export type RecentViewedItem = {
   productId: number;
@@ -39,7 +40,7 @@ export function addRecentViewedItem(
     viewedAt: new Date().toISOString(),
   };
 
-  const updated = [newItem, ...filtered];
+  const updated = [newItem, ...filtered].slice(0, MAX_ITEMS);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   window.dispatchEvent(new Event("recent-items-updated"));
 }

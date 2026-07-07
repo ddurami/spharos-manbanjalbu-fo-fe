@@ -44,13 +44,15 @@ export function CartItemRow({
         />
       </label>
 
-      <ImagePlaceholder
-        src={item.thumbnailUrl}
-        alt={item.productName}
-        width={100}
-        height={100}
-        className="size-[100px] shrink-0 rounded-lg object-cover"
-      />
+      <div className="size-[100px] shrink-0 overflow-hidden rounded-lg bg-placeholder">
+        <ImagePlaceholder
+          src={item.thumbnailUrl}
+          alt={item.productName}
+          width={100}
+          height={100}
+          className="size-full object-cover"
+        />
+      </div>
 
       <div className="flex flex-1 items-center justify-between">
         <div className="flex flex-col gap-5">

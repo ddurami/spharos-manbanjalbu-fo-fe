@@ -39,7 +39,7 @@ export function CartAddedAlert({ open, onClose }: CartAddedAlertProps) {
           </button>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => router.push("/products")}
             className="h-[48px] w-[180px] rounded-full bg-sb-green text-sm font-medium text-white hover:bg-[#009658]"
           >
             상품 더보기

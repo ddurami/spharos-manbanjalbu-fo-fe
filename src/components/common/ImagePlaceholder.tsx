@@ -4,13 +4,22 @@ import Image from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+const OPTIMIZED_HOSTS = [
+  "picsum.photos",
+  "localhost",
+  "121.175.193.122",
+  "image.istarbucks.co.kr",
+  "amazonaws.com",
+];
+
 function shouldUseNextImage(src: string): boolean {
   if (src.startsWith("/")) {
     return true;
   }
 
   try {
-    return new URL(src).hostname.endsWith("picsum.photos");
+    const hostname = new URL(src).hostname;
+    return OPTIMIZED_HOSTS.some((host) => hostname.endsWith(host));
   } catch {
     return false;
   }

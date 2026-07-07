@@ -38,3 +38,7 @@ export function deleteAllCartItems() {
     method: "DELETE",
   });
 }
+
+export function getCartCount() {
+  return apiRequest<number>("/api/cart/count");
+}
