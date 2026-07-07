@@ -11,8 +11,9 @@ import { PaymentMethodSection } from "@/components/checkout/payment-method-secti
 import { PriceSummarySidebar } from "@/components/common/price-summary-sidebar";
 import { AddressSection } from "@/components/checkout/address-section";
 import { Button } from "@/components/ui/button";
-import { fetchDefaultAddress } from "@/lib/address/address-service";
-import type { Address } from "@/lib/address/types";
+import { fetchDefaultStoredAddress } from "@/lib/address/address-service";
+import { toAddress } from "@/lib/address/mapper";
+import type { Address, StoredAddress } from "@/lib/address/types";
 import { isRegisteredAddress } from "@/lib/address/validate-address";
 import {
   deleteCartItems,
@@ -20,9 +21,11 @@ import {
   updateCartItemQuantity,
 } from "@/lib/api/cart";
 import { ApiError } from "@/lib/api/client";
+import { buildOrderCreateRequest, createOrder } from "@/lib/api/order";
 import { parseCartItemIds, toOrderItems } from "@/lib/cart/checkout";
 import { MAX_ITEM_QUANTITY } from "@/lib/cart/types";
 import { calculateCheckoutSummary } from "@/lib/checkout/calculate-summary";
+import { saveOrderResult } from "@/lib/checkout/order-session";
 import { CHECKOUT_ACTION_BAR_HEIGHT } from "@/lib/checkout/types";
 import type { OrderItem, PaymentMethod } from "@/lib/checkout/types";
 import { useAuth } from "@/contexts/auth-context";
@@ -40,9 +43,12 @@ export function CheckoutContent() {
   const [items, setItems] = useState<OrderItem[]>([]);
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("starbucks-card");
-  const [address, setAddress] = useState<Address | null>(null);
+  const [defaultStoredAddress, setDefaultStoredAddress] =
+    useState<StoredAddress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
   const loadCheckoutItems = useCallback(async () => {
     if (cartItemIds.length === 0) {
@@ -92,9 +98,9 @@ export function CheckoutContent() {
 
     const loadAddress = async () => {
       try {
-        setAddress(await fetchDefaultAddress());
+        setDefaultStoredAddress(await fetchDefaultStoredAddress());
       } catch {
-        setAddress(null);
+        setDefaultStoredAddress(null);
       }
     };
 
@@ -109,8 +115,57 @@ export function CheckoutContent() {
     };
   }, [pathname]);
 
+  const address = useMemo<Address | null>(
+    () => (defaultStoredAddress ? toAddress(defaultStoredAddress) : null),
+    [defaultStoredAddress],
+  );
   const summary = useMemo(() => calculateCheckoutSummary(items), [items]);
   const hasAddress = isRegisteredAddress(address);
+
+  const handlePurchase = async () => {
+    if (!defaultStoredAddress || cartItemIds.length === 0) {
+      return;
+    }
+
+    const memberAddressId = Number(defaultStoredAddress.id);
+    if (!Number.isFinite(memberAddressId) || memberAddressId <= 0) {
+      setPurchaseError(
+        "등록된 배송지 정보가 올바르지 않습니다. 배송지를 다시 등록해 주세요.",
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    setPurchaseError(null);
+
+    try {
+      const response = await createOrder(
+        buildOrderCreateRequest({
+          cartItemIds,
+          memberAddressId,
+          paymentMethod,
+          deliveryMemo: address?.deliveryMemo.trim() || undefined,
+        }),
+      );
+
+      saveOrderResult(response);
+      router.push("/checkout/complete");
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        logout();
+        router.replace("/login");
+        return;
+      }
+
+      setPurchaseError(
+        error instanceof ApiError
+          ? error.message
+          : "주문 처리 중 오류가 발생했습니다.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleQuantityChange = async (id: string, quantity: number) => {
     const nextQuantity = Math.min(MAX_ITEM_QUANTITY, Math.max(1, quantity));
@@ -169,9 +224,9 @@ export function CheckoutContent() {
         <p className="text-base text-sb-text-muted">
           결제할 상품이 없습니다. 장바구니에서 상품을 선택해 주세요.
         </p>
-        <Button asChild className="rounded-full px-8">
-          <Link href="/cart">장바구니로 이동</Link>
-        </Button>
+        <Link href="/cart">
+          <Button className="rounded-full px-8">장바구니로 이동</Button>
+        </Link>
       </div>
     );
   }
@@ -180,9 +235,11 @@ export function CheckoutContent() {
     return (
       <div className="mx-auto flex w-full max-w-[850px] flex-1 flex-col items-center justify-center gap-6 px-[50px] py-20 lg:px-[300px]">
         <p className="text-base text-destructive">{errorMessage}</p>
-        <Button asChild variant="outline" className="rounded-full px-8">
-          <Link href="/cart">장바구니로 돌아가기</Link>
-        </Button>
+        <Link href="/cart">
+          <Button variant="outline" className="rounded-full px-8">
+            장바구니로 돌아가기
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -216,7 +273,15 @@ export function CheckoutContent() {
         </div>
       </div>
 
-      <CheckoutActionBar summary={summary} hasAddress={hasAddress} />
+      <CheckoutActionBar
+        summary={summary}
+        hasAddress={hasAddress}
+        isSubmitting={isSubmitting}
+        purchaseError={purchaseError}
+        onPurchase={() => {
+          void handlePurchase();
+        }}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { CheckoutPaymentMethod } from "@/lib/checkout/types";
+import type { PaymentMethod } from "@/lib/checkout/types";
 import type {
   OrderCreateRequest,
   OrderCreateResponse,
@@ -6,7 +6,7 @@ import type {
 } from "@/types/order";
 import { apiRequest } from "@/lib/api/client";
 
-const PAYMENT_METHOD_MAP: Record<CheckoutPaymentMethod, OrderPaymentMethod> = {
+const PAYMENT_METHOD_MAP: Record<PaymentMethod, OrderPaymentMethod> = {
   "credit-card": "CARD",
   ssgpay: "MOBILE",
   "simple-pay": "EASY_PAY",
@@ -14,7 +14,7 @@ const PAYMENT_METHOD_MAP: Record<CheckoutPaymentMethod, OrderPaymentMethod> = {
 };
 
 export function toOrderPaymentMethod(
-  paymentMethod: CheckoutPaymentMethod,
+  paymentMethod: PaymentMethod,
 ): OrderPaymentMethod {
   return PAYMENT_METHOD_MAP[paymentMethod];
 }
@@ -29,7 +29,7 @@ export function createOrder(request: OrderCreateRequest) {
 export type CreateOrderParams = {
   cartItemIds: number[];
   memberAddressId: number;
-  paymentMethod: CheckoutPaymentMethod;
+  paymentMethod: PaymentMethod;
   deliveryMemo?: string;
 };
 
