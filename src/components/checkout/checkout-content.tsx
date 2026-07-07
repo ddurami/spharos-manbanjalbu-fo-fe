@@ -169,9 +169,9 @@ export function CheckoutContent() {
         <p className="text-base text-sb-text-muted">
           결제할 상품이 없습니다. 장바구니에서 상품을 선택해 주세요.
         </p>
-        <Button asChild className="rounded-full px-8">
-          <Link href="/cart">장바구니로 이동</Link>
-        </Button>
+        <Link href="/cart">
+          <Button className="rounded-full px-8">장바구니로 이동</Button>
+        </Link>
       </div>
     );
   }
@@ -180,9 +180,9 @@ export function CheckoutContent() {
     return (
       <div className="mx-auto flex w-full max-w-[850px] flex-1 flex-col items-center justify-center gap-6 px-[50px] py-20 lg:px-[300px]">
         <p className="text-base text-destructive">{errorMessage}</p>
-        <Button asChild variant="outline" className="rounded-full px-8">
-          <Link href="/cart">장바구니로 돌아가기</Link>
-        </Button>
+        <Link href="/cart">
+          <Button variant="outline" className="rounded-full px-8">장바구니로 돌아가기</Button>
+        </Link>
       </div>
     );
   }

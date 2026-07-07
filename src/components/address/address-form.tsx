@@ -274,193 +274,193 @@ export function AddressForm({
       />
 
       <form
-      className="flex w-full flex-col gap-10"
-      noValidate
-      onSubmit={handleSubmit}
-    >
-      <AddressField label="주소별칭" htmlFor="nickname">
-        <Input
-          id="nickname"
-          value={form.nickname}
-          onChange={(event) => updateField("nickname", event.target.value)}
-          className={underlineInputClassName}
-        />
-      </AddressField>
-
-      <AddressField
-        label="받는 분"
-        required
-        htmlFor="recipient"
-        error={errors.recipient}
+        className="flex w-full flex-col gap-10"
+        noValidate
+        onSubmit={handleSubmit}
       >
-        <Input
-          id="recipient"
-          value={form.recipient}
-          onChange={(event) => updateField("recipient", event.target.value)}
-          className={underlineInputClassName}
-          aria-invalid={Boolean(errors.recipient)}
-        />
-      </AddressField>
-
-      <AddressField
-        label="우편번호"
-        required
-        htmlFor="zipCode"
-        error={errors.zipCode ?? addressSearchError ?? undefined}
-      >
-        <div className="flex items-end gap-4">
+        <AddressField label="주소별칭" htmlFor="nickname">
           <Input
-            id="zipCode"
+            id="nickname"
+            value={form.nickname}
+            onChange={(event) => updateField("nickname", event.target.value)}
+            className={underlineInputClassName}
+          />
+        </AddressField>
+
+        <AddressField
+          label="받는 분"
+          required
+          htmlFor="recipient"
+          error={errors.recipient}
+        >
+          <Input
+            id="recipient"
+            value={form.recipient}
+            onChange={(event) => updateField("recipient", event.target.value)}
+            className={underlineInputClassName}
+            aria-invalid={Boolean(errors.recipient)}
+          />
+        </AddressField>
+
+        <AddressField
+          label="우편번호"
+          required
+          htmlFor="zipCode"
+          error={errors.zipCode ?? addressSearchError ?? undefined}
+        >
+          <div className="flex items-end gap-4">
+            <Input
+              id="zipCode"
+              readOnly
+              value={form.zipCode}
+              placeholder="주소검색을 이용해 주세요."
+              className={underlineInputClassName}
+              aria-invalid={Boolean(errors.zipCode || addressSearchError)}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSearchingAddress}
+              onClick={handleAddressSearch}
+              className={addressSearchButtonClassName}
+            >
+              {isSearchingAddress ? "불러오는 중..." : "주소검색"}
+            </Button>
+          </div>
+        </AddressField>
+
+        <AddressField
+          label="기본주소"
+          required
+          htmlFor="address"
+          error={errors.address}
+        >
+          <Input
+            id="address"
             readOnly
-            value={form.zipCode}
+            value={form.address}
             placeholder="주소검색을 이용해 주세요."
             className={underlineInputClassName}
-            aria-invalid={Boolean(errors.zipCode || addressSearchError)}
+            aria-invalid={Boolean(errors.address)}
           />
-          <Button
-            type="button"
-            variant="outline"
-            disabled={isSearchingAddress}
-            onClick={handleAddressSearch}
-            className={addressSearchButtonClassName}
-          >
-            {isSearchingAddress ? "불러오는 중..." : "주소검색"}
-          </Button>
-        </div>
-      </AddressField>
+        </AddressField>
 
-      <AddressField
-        label="기본주소"
-        required
-        htmlFor="address"
-        error={errors.address}
-      >
-        <Input
-          id="address"
-          readOnly
-          value={form.address}
-          placeholder="주소검색을 이용해 주세요."
-          className={underlineInputClassName}
-          aria-invalid={Boolean(errors.address)}
-        />
-      </AddressField>
-
-      <AddressField
-        label="상세주소"
-        required
-        htmlFor="addressDetail"
-        error={errors.addressDetail}
-      >
-        <Input
-          id="addressDetail"
-          ref={addressDetailRef}
-          value={form.addressDetail}
-          onChange={(event) =>
-            updateField("addressDetail", event.target.value)
-          }
-          placeholder="동, 호수 등 상세주소를 입력해 주세요."
-          className={underlineInputClassName}
-          aria-invalid={Boolean(errors.addressDetail)}
-        />
-      </AddressField>
-
-      <AddressField
-        label="연락처1"
-        required
-        htmlFor="phone1"
-        error={errors.phone1}
-      >
-        <Input
-          id="phone1"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          value={form.phone1}
-          onChange={(event) =>
-            updateField("phone1", normalizePhoneInput(event.target.value))
-          }
-          placeholder="01012345678"
-          className={underlineInputClassName}
-          aria-invalid={Boolean(errors.phone1)}
-        />
-      </AddressField>
-
-      <AddressField label="연락처2" htmlFor="phone2" error={errors.phone2}>
-        <Input
-          id="phone2"
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          value={form.phone2}
-          onChange={(event) =>
-            updateField("phone2", normalizePhoneInput(event.target.value))
-          }
-          placeholder="01012345678"
-          className={underlineInputClassName}
-          aria-invalid={Boolean(errors.phone2)}
-        />
-      </AddressField>
-
-      <AddressField label="배송 메모" htmlFor="deliveryMemo">
-        <Select
-          value={form.deliveryMemo || undefined}
-          onValueChange={(value) => updateField("deliveryMemo", value ?? "")}
+        <AddressField
+          label="상세주소"
+          required
+          htmlFor="addressDetail"
+          error={errors.addressDetail}
         >
-          <SelectTrigger
-            id="deliveryMemo"
-            className={underlineSelectTriggerClassName}
-          >
-            <SelectValue placeholder="배송 메모를 선택해 주세요." />
-          </SelectTrigger>
-          <SelectContent>
-            {DELIVERY_MEMO_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </AddressField>
-
-      {isMypageForm ? (
-        <label className="flex items-center gap-3 text-base text-foreground">
-          <input
-            type="checkbox"
-            checked={isDefault}
-            disabled={isDefaultLocked}
-            onChange={(event) => setIsDefault(event.target.checked)}
-            className="size-4 accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+          <Input
+            id="addressDetail"
+            ref={addressDetailRef}
+            value={form.addressDetail}
+            onChange={(event) =>
+              updateField("addressDetail", event.target.value)
+            }
+            placeholder="동, 호수 등 상세주소를 입력해 주세요."
+            className={underlineInputClassName}
+            aria-invalid={Boolean(errors.addressDetail)}
           />
-          기본 배송지로 설정
-        </label>
-      ) : null}
+        </AddressField>
 
-      {submitError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {submitError}
-        </p>
-      ) : null}
+        <AddressField
+          label="연락처1"
+          required
+          htmlFor="phone1"
+          error={errors.phone1}
+        >
+          <Input
+            id="phone1"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={form.phone1}
+            onChange={(event) =>
+              updateField("phone1", normalizePhoneInput(event.target.value))
+            }
+            placeholder="01012345678"
+            className={underlineInputClassName}
+            aria-invalid={Boolean(errors.phone1)}
+          />
+        </AddressField>
 
-      <div className="flex items-center justify-end gap-3 pt-2">
-        <Link href={cancelHref}>
+        <AddressField label="연락처2" htmlFor="phone2" error={errors.phone2}>
+          <Input
+            id="phone2"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={form.phone2}
+            onChange={(event) =>
+              updateField("phone2", normalizePhoneInput(event.target.value))
+            }
+            placeholder="01012345678"
+            className={underlineInputClassName}
+            aria-invalid={Boolean(errors.phone2)}
+          />
+        </AddressField>
+
+        <AddressField label="배송 메모" htmlFor="deliveryMemo">
+          <Select
+            value={form.deliveryMemo || undefined}
+            onValueChange={(value) => updateField("deliveryMemo", value ?? "")}
+          >
+            <SelectTrigger
+              id="deliveryMemo"
+              className={underlineSelectTriggerClassName}
+            >
+              <SelectValue placeholder="배송 메모를 선택해 주세요." />
+            </SelectTrigger>
+            <SelectContent>
+              {DELIVERY_MEMO_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </AddressField>
+
+        {isMypageForm ? (
+          <label className="flex items-center gap-3 text-base text-foreground">
+            <input
+              type="checkbox"
+              checked={isDefault}
+              disabled={isDefaultLocked}
+              onChange={(event) => setIsDefault(event.target.checked)}
+              className="size-4 accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+            />
+            기본 배송지로 설정
+          </label>
+        ) : null}
+
+        {submitError ? (
+          <p className="text-sm text-destructive" role="alert">
+            {submitError}
+          </p>
+        ) : null}
+
+        <div className="flex items-center justify-end gap-3 pt-2">
+          <Link href={cancelHref}>
+            <Button
+              type="button"
+              variant="outline"
+              className={outlineButtonClassName}
+              disabled={isSubmitting}
+            >
+              취소
+            </Button>
+          </Link>
           <Button
-            type="button"
-            variant="outline"
-            className={outlineButtonClassName}
+            type="submit"
+            className="h-14 rounded-full px-8 text-[17px]"
             disabled={isSubmitting}
           >
-            취소
+            {isSubmitting ? "저장 중..." : "저장"}
           </Button>
-        </Link>
-        <Button
-          type="submit"
-          className="h-14 rounded-full px-8 text-[17px]"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "저장 중..." : "저장"}
-        </Button>
-      </div>
-    </form>
+        </div>
+      </form>
     </>
   );
 }

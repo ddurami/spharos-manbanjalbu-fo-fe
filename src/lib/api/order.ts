@@ -1,4 +1,4 @@
-import type { CheckoutPaymentMethod } from "@/lib/checkout/types";
+import type { PaymentMethod as CheckoutPaymentMethod } from "@/lib/checkout/types";
 import type {
   OrderCreateRequest,
   OrderCreateResponse,
