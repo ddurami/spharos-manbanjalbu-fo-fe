@@ -4,14 +4,15 @@ import Image from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const ALLOWED_HOSTS = ["picsum.photos", "localhost"];
+function shouldUseNextImage(src: string): boolean {
+  if (src.startsWith("/")) {
+    return true;
+  }
 
-function isAllowedSrc(src: string): boolean {
   try {
-    const url = new URL(src);
-    return ALLOWED_HOSTS.some((host) => url.hostname.endsWith(host));
+    return new URL(src).hostname.endsWith("picsum.photos");
   } catch {
-    return src.startsWith("/");
+    return false;
   }
 }
 
@@ -36,7 +37,7 @@ export function ImagePlaceholder({
 }: ImagePlaceholderProps) {
   const [hasError, setHasError] = useState(false);
 
-  if (!src || hasError || !isAllowedSrc(src)) {
+  if (!src || hasError) {
     return (
       <div
         className={cn(
@@ -45,6 +46,18 @@ export function ImagePlaceholder({
         )}
         role="img"
         aria-label={alt}
+      />
+    );
+  }
+
+  if (!shouldUseNextImage(src)) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt}
+        className={cn(fill && "absolute inset-0 h-full w-full", className)}
+        onError={() => setHasError(true)}
       />
     );
   }
