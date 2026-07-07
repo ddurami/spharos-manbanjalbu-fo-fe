@@ -15,7 +15,7 @@ export function toStoredAddress(response: MemberAddressResponse): StoredAddress 
     recipient: response.recipientName,
     zipCode: response.zipcode,
     address: response.baseAddress,
-    addressDetail: response.detailAddress,
+    addressDetail: response.detailAddress ?? "",
     phone1: response.phone1,
     phone2: response.phone2 ?? "",
     deliveryMemo: response.deliveryMemo ?? "",

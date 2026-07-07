@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 type CheckoutActionBarProps = {
   summary: CheckoutSummary;
   hasAddress: boolean;
+  hasSelectedCard?: boolean;
   isSubmitting?: boolean;
   purchaseError?: string | null;
   onPurchase?: () => void;
@@ -18,13 +19,17 @@ type CheckoutActionBarProps = {
 export function CheckoutActionBar({
   summary,
   hasAddress,
+  hasSelectedCard = true,
   isSubmitting = false,
   purchaseError,
   onPurchase,
   className,
 }: CheckoutActionBarProps) {
   const canPurchase =
-    summary.itemCount > 0 && hasAddress && !isSubmitting;
+    summary.itemCount > 0 &&
+    hasAddress &&
+    hasSelectedCard &&
+    !isSubmitting;
 
   return (
     <div
@@ -66,7 +71,7 @@ export function CheckoutActionBar({
             onClick={onPurchase}
             className="h-14 w-full max-w-[210px] rounded-full text-[17px]"
           >
-            {isSubmitting ? "주문 처리 중..." : "구매하기"}
+            {isSubmitting ? "결제 처리 중..." : "구매하기"}
           </Button>
         </div>
       </div>

@@ -9,15 +9,33 @@ import { Button } from "@/components/ui/button";
 import {
   clearOrderResult,
   getOrderResult,
+  type CheckoutResult,
 } from "@/lib/checkout/order-session";
-import type { OrderCreateResponse } from "@/types/order";
 
 const outlineButtonClassName =
   "h-14 rounded-full border-[1.5px] border-primary px-8 text-[17px] tracking-tight text-primary hover:bg-sb-green-soft hover:text-primary";
 
+const PAYMENT_STATUS_LABEL: Record<string, string> = {
+  SUCCESS: "결제 완료",
+  CANCEL: "결제 취소",
+  READY: "결제 대기",
+  IN_PROGRESS: "결제 진행 중",
+  FAILED: "결제 실패",
+  REFUNDED: "환불 완료",
+};
+
+const PG_NAME_LABEL: Record<string, string> = {
+  MOCK: "모의 결제",
+  TOSS: "토스페이먼츠",
+  INICIS: "KG이니시스",
+  KAKAO_PAY: "카카오페이",
+};
+
 export function CheckoutCompleteContent() {
   const router = useRouter();
-  const [order, setOrder] = useState<OrderCreateResponse | null>(null);
+  const [checkoutResult, setCheckoutResult] = useState<CheckoutResult | null>(
+    null,
+  );
 
   useEffect(() => {
     const result = getOrderResult();
@@ -27,17 +45,28 @@ export function CheckoutCompleteContent() {
       return;
     }
 
-    setOrder(result);
-    clearOrderResult();
+    setCheckoutResult(result);
+
+    const handlePageHide = () => {
+      clearOrderResult();
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+    };
   }, [router]);
 
-  if (!order) {
+  if (!checkoutResult) {
     return (
       <div className="flex flex-1 items-center justify-center py-20">
         <p className="text-base text-sb-text-muted">주문 정보를 불러오는 중...</p>
       </div>
     );
   }
+
+  const { order, payment } = checkoutResult;
 
   return (
     <div className="mx-auto flex w-full max-w-[850px] flex-1 flex-col gap-[50px] px-[50px] py-[50px] lg:px-[300px]">
@@ -56,10 +85,26 @@ export function CheckoutCompleteContent() {
           <dd className="font-medium text-foreground">{order.orderNo}</dd>
         </div>
         <div className="flex items-center justify-between gap-4 text-base">
+          <dt className="text-sb-text-muted">승인번호</dt>
+          <dd className="font-medium text-foreground">{payment.approvedNumber}</dd>
+        </div>
+        <div className="flex items-center justify-between gap-4 text-base">
+          <dt className="text-sb-text-muted">결제상태</dt>
+          <dd className="font-medium text-foreground">
+            {PAYMENT_STATUS_LABEL[payment.paymentStatus] ?? payment.paymentStatus}
+          </dd>
+        </div>
+        <div className="flex items-center justify-between gap-4 text-base">
+          <dt className="text-sb-text-muted">결제수단</dt>
+          <dd className="font-medium text-foreground">
+            {PG_NAME_LABEL[payment.pgName] ?? payment.pgName}
+          </dd>
+        </div>
+        <div className="flex items-center justify-between gap-4 text-base">
           <dt className="text-sb-text-muted">결제금액</dt>
           <dd>
             <PriceDisplay
-              amount={order.orderAmount}
+              amount={payment.paidAmount}
               amountClassName="text-xl font-bold text-foreground"
               className="text-foreground"
             />

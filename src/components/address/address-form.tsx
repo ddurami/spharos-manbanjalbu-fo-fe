@@ -64,6 +64,7 @@ export function AddressForm({
   const router = useRouter();
   const addressDetailRef = useRef<HTMLInputElement>(null);
   const isMypageForm = redirectHref.startsWith("/mypage");
+  const isCheckoutForm = redirectHref.startsWith("/checkout");
   const [form, setForm] = useState<Address>(EMPTY_ADDRESS);
   const [isDefault, setIsDefault] = useState(false);
   const [isDefaultLocked, setIsDefaultLocked] = useState(false);
@@ -135,7 +136,7 @@ export function AddressForm({
         }
       }
 
-      if (redirectHref === "/checkout") {
+      if (isCheckoutForm) {
         try {
           const saved = await fetchDefaultAddress();
           if (cancelled || !saved) {
@@ -160,7 +161,7 @@ export function AddressForm({
     return () => {
       cancelled = true;
     };
-  }, [addressId, redirectHref, isMypageForm]);
+  }, [addressId, redirectHref, isMypageForm, isCheckoutForm]);
 
   const updateField = <K extends keyof Address>(key: K, value: Address[K]) => {
     setForm((current) => ({ ...current, [key]: value }));

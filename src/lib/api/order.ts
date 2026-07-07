@@ -10,7 +10,6 @@ const PAYMENT_METHOD_MAP: Record<CheckoutPaymentMethod, OrderPaymentMethod> = {
   "credit-card": "CARD",
   ssgpay: "MOBILE",
   "simple-pay": "EASY_PAY",
-  "starbucks-card": "EASY_PAY",
 };
 
 export function toOrderPaymentMethod(
@@ -31,6 +30,8 @@ export type CreateOrderParams = {
   memberAddressId: number;
   paymentMethod: CheckoutPaymentMethod;
   deliveryMemo?: string;
+  orderType?: OrderCreateRequest["orderType"];
+  reservationDeliveryDate?: string;
 };
 
 export function buildOrderCreateRequest({
@@ -38,11 +39,15 @@ export function buildOrderCreateRequest({
   memberAddressId,
   paymentMethod,
   deliveryMemo,
+  orderType,
+  reservationDeliveryDate,
 }: CreateOrderParams): OrderCreateRequest {
   return {
     cartItemIds,
     memberAddressId,
     paymentMethod: toOrderPaymentMethod(paymentMethod),
     deliveryMemo,
+    orderType,
+    reservationDeliveryDate,
   };
 }

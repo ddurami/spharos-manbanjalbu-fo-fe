@@ -33,6 +33,7 @@ export type OrderCreateRequest = {
   memberCouponId?: number;
   orderType?: OrderType;
   orderCategory?: OrderCategory;
+  reservationDeliveryDate?: string;
 };
 
 export type OrderCreateResponse = {
