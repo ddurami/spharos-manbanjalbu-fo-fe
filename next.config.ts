@@ -28,12 +28,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // 백엔드 IP 주소를 숨기기 위한 프록시(Rewrite) 설정
+  // BACKEND_URL이 있을 때만 rewrite 적용 (미설정 시 빌드 실패 방지)
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL;
+    if (!backendUrl) return [];
+
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.BACKEND_URL}/api/:path*`,
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },
