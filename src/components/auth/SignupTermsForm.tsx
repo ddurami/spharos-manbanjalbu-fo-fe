@@ -5,28 +5,31 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { SignupStepIndicator } from "@/components/auth/SignupStepIndicator";
+import {
+  SIGNUP_TERM_CONFIGS,
+  SIGNUP_TERM_SLUG_BY_AGREEMENT_KEY,
+  type SignupTermAgreementKey as SignupTermDetailKey,
+} from "@/constants/signup-terms";
 import { ApiError } from "@/lib/api/client";
 import { agreeTerms, getTerms } from "@/lib/api/member";
+import {
+  getSignupTermAgreements,
+  setAllSignupTermAgreements,
+  setSignupTermAgreements,
+  updateSignupTermAgreement,
+  type SignupTermAgreementKey,
+  type SignupTermAgreements,
+} from "@/lib/signup-terms-session";
 import { getSignupSession, updateSignupSession } from "@/lib/signup-session";
 import type { TermsResponse } from "@/types/member";
 
-type AgreementKey =
-  | "termsOfService"
-  | "privacy"
-  | "cardTerms"
-  | "marketing"
-  | "emailAds"
-  | "smsAds";
-
-type Agreements = Record<AgreementKey, boolean>;
-
-const REQUIRED_KEYS: AgreementKey[] = [
+const REQUIRED_KEYS: SignupTermAgreementKey[] = [
   "termsOfService",
   "privacy",
   "cardTerms",
 ];
 
-const ALL_KEYS: AgreementKey[] = [
+const ALL_KEYS: SignupTermAgreementKey[] = [
   "termsOfService",
   "privacy",
   "cardTerms",
@@ -35,44 +38,11 @@ const ALL_KEYS: AgreementKey[] = [
   "smsAds",
 ];
 
-const TERM_ITEMS = [
-  {
-    key: "termsOfService" as const,
-    label: "[필수] 이용약관 동의",
-    required: true,
-  },
-  {
-    key: "privacy" as const,
-    label: "[필수] 개인정보 수집 및 이용 동의",
-    required: true,
-  },
-  {
-    key: "cardTerms" as const,
-    label: "[필수] 스타벅스 카드 이용약관",
-    required: true,
-  },
-  {
-    key: "marketing" as const,
-    label: "[선택] 마케팅 활용 수집 이용 동의",
-    required: false,
-  },
-] as const;
-
-const INITIAL_AGREEMENTS: Agreements = {
-  termsOfService: false,
-  privacy: false,
-  cardTerms: false,
-  marketing: false,
-  emailAds: false,
-  smsAds: false,
-};
-
 type AgreementCheckboxProps = {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label: string;
   id: string;
-  showArrow?: boolean;
 };
 
 function AgreementCheckbox({
@@ -80,36 +50,72 @@ function AgreementCheckbox({
   onChange,
   label,
   id,
-  showArrow = false,
 }: AgreementCheckboxProps) {
   return (
-    <label
-      htmlFor={id}
-      className="flex cursor-pointer items-center gap-3 py-3"
-    >
+    <div className="flex items-center gap-3 py-3">
       <input
         id={id}
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="size-5 shrink-0 appearance-none rounded border-2 border-[#00704A] bg-white checked:border-[#00704A] checked:bg-[#00704A] checked:bg-[length:12px_12px] checked:bg-center checked:bg-no-repeat checked:bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2012%2012%27%20fill=%27none%27%3E%3Cpath%20d=%27M2%206l3%203%205-5%27%20stroke=%27white%27%20stroke-width=%271.8%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E')]"
+        className="size-5 shrink-0 cursor-pointer appearance-none rounded border-2 border-[#00704A] bg-white checked:border-[#00704A] checked:bg-[#00704A] checked:bg-[length:12px_12px] checked:bg-center checked:bg-no-repeat checked:bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2012%2012%27%20fill=%27none%27%3E%3Cpath%20d=%27M2%206l3%203%205-5%27%20stroke=%27white%27%20stroke-width=%271.8%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E')]"
       />
       <span className="min-w-0 flex-1 text-sm leading-5 text-[#222]">
         {label}
       </span>
-      {showArrow && (
-        <ChevronRight className="size-4 shrink-0 text-[#bbb]" aria-hidden />
-      )}
-    </label>
+    </div>
+  );
+}
+
+type AgreementRowProps = {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+  id: string;
+  onDetailClick: () => void;
+};
+
+function AgreementRow({
+  checked,
+  onChange,
+  label,
+  id,
+  onDetailClick,
+}: AgreementRowProps) {
+  return (
+    <div className="flex items-center gap-3 py-3">
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="size-5 shrink-0 cursor-pointer appearance-none rounded border-2 border-[#00704A] bg-white checked:border-[#00704A] checked:bg-[#00704A] checked:bg-[length:12px_12px] checked:bg-center checked:bg-no-repeat checked:bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2012%2012%27%20fill=%27none%27%3E%3Cpath%20d=%27M2%206l3%203%205-5%27%20stroke=%27white%27%20stroke-width=%271.8%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27/%3E%3C/svg%3E')]"
+      />
+      <span className="min-w-0 flex-1 text-sm leading-5 text-[#222]">{label}</span>
+      <button
+        type="button"
+        onClick={onDetailClick}
+        aria-label={`${label} 상세 보기`}
+        className="shrink-0 p-1 text-[#bbb] transition-colors hover:text-[#888]"
+      >
+        <ChevronRight className="size-4" aria-hidden />
+      </button>
+    </div>
   );
 }
 
 export function SignupTermsForm() {
   const router = useRouter();
-  const [agreements, setAgreements] = useState<Agreements>(INITIAL_AGREEMENTS);
+  const [agreements, setAgreements] = useState<SignupTermAgreements>(
+    getSignupTermAgreements,
+  );
   const [termsList, setTermsList] = useState<TermsResponse[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setAgreements(getSignupTermAgreements());
+  }, []);
 
   useEffect(() => {
     getTerms()
@@ -138,32 +144,19 @@ export function SignupTermsForm() {
     [agreements],
   );
 
-  function updateAgreement(key: AgreementKey, checked: boolean) {
-    setAgreements((prev) => {
-      const next = { ...prev, [key]: checked };
-
-      if (key === "marketing") {
-        next.emailAds = checked;
-        next.smsAds = checked;
-      }
-
-      if (key === "emailAds" || key === "smsAds") {
-        next.marketing = next.emailAds && next.smsAds;
-      }
-
-      return next;
-    });
+  function updateAgreement(key: SignupTermAgreementKey, checked: boolean) {
+    const next = updateSignupTermAgreement(key, checked);
+    setAgreements(next);
   }
 
   function handleCheckAll(checked: boolean) {
-    setAgreements({
-      termsOfService: checked,
-      privacy: checked,
-      cardTerms: checked,
-      marketing: checked,
-      emailAds: checked,
-      smsAds: checked,
-    });
+    const next = setAllSignupTermAgreements(checked);
+    setAgreements(next);
+  }
+
+  function handleDetailClick(agreementKey: SignupTermDetailKey) {
+    setSignupTermAgreements(agreements);
+    router.push(`/signup/terms/${SIGNUP_TERM_SLUG_BY_AGREEMENT_KEY[agreementKey]}`);
   }
 
   async function handleNext() {
@@ -182,7 +175,7 @@ export function SignupTermsForm() {
     setSubmitError(null);
     setIsSubmitting(true);
 
-    const mandatoryKeys: AgreementKey[] = [
+    const mandatoryKeys: SignupTermAgreementKey[] = [
       "termsOfService",
       "privacy",
       "cardTerms",
@@ -255,17 +248,17 @@ export function SignupTermsForm() {
         />
 
         <div className="border-t border-[#eee]">
-          {TERM_ITEMS.map((item) => (
-            <div key={item.key} className="border-b border-[#eee]">
-              <AgreementCheckbox
-                id={`agree-${item.key}`}
-                checked={agreements[item.key]}
-                onChange={(checked) => updateAgreement(item.key, checked)}
-                label={item.label}
-                showArrow
+          {SIGNUP_TERM_CONFIGS.map((item) => (
+            <div key={item.agreementKey} className="border-b border-[#eee]">
+              <AgreementRow
+                id={`agree-${item.agreementKey}`}
+                checked={agreements[item.agreementKey]}
+                onChange={(checked) => updateAgreement(item.agreementKey, checked)}
+                label={item.listLabel}
+                onDetailClick={() => handleDetailClick(item.agreementKey)}
               />
 
-              {item.key === "marketing" && (
+              {item.agreementKey === "marketing" && (
                 <div className="pb-4 pl-8">
                   <p className="text-sm text-[#888]">광고성 정보 수신 팝업</p>
                   <div className="mt-3 flex items-center gap-8">
