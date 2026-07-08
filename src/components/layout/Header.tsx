@@ -3,12 +3,17 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { HeaderNav } from "@/components/layout/HeaderNav";
 import { HeaderActions } from "@/components/layout/HeaderActions";
 import { MenuPanel } from "@/components/layout/MenuPanel";
 import { SearchPanel } from "@/components/search/SearchPanel";
 
-export function Header() {
+type HeaderProps = {
+  className?: string;
+};
+
+export function Header({ className }: HeaderProps) {
   const [activePanel, setActivePanel] = useState<"menu" | "search" | null>(
     null,
   );
@@ -34,7 +39,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white">
+    <header className={cn("sticky top-0 z-50 shrink-0 bg-white", className)}>
       <div className="border-b border-black/5">
         <div className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between px-6 lg:px-10">
           <div className="flex items-center gap-10 lg:gap-14">

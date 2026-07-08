@@ -32,6 +32,23 @@ const UTILITY_LINKS = [
 
 
 
+const WITHDRAWN_ACCOUNT_MESSAGE = "이미 탈퇴한 계정입니다.";
+
+function resolveLoginErrorMessage(error: unknown): string {
+  if (!(error instanceof ApiError)) {
+    return "로그인에 실패했습니다.";
+  }
+
+  if (
+    error.message === "이미 탈퇴한 회원입니다." ||
+    error.message === WITHDRAWN_ACCOUNT_MESSAGE
+  ) {
+    return WITHDRAWN_ACCOUNT_MESSAGE;
+  }
+
+  return error.message;
+}
+
 export function LoginForm() {
 
   const router = useRouter();
@@ -79,16 +96,7 @@ export function LoginForm() {
       router.push("/mypage");
 
     } catch (loginError) {
-
-      setError(
-
-        loginError instanceof ApiError
-
-          ? loginError.message
-
-          : "로그인에 실패했습니다.",
-
-      );
+      setError(resolveLoginErrorMessage(loginError));
 
     } finally {
 

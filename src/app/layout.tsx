@@ -31,10 +31,12 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex h-dvh flex-col overflow-hidden">
         <AuthProvider>
           <Header />
-          <main className="flex-1">{children}</main>
+          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            {children}
+          </main>
           <Footer />
           <RecentItemsFloating />
         </AuthProvider>

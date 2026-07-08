@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const LEGAL_LINKS = [
   { label: "개인정보처리방침", href: "/privacy", highlight: true },
@@ -14,9 +15,14 @@ function Separator() {
   );
 }
 
-export function Footer() {
+export function Footer({ className }: { className?: string }) {
   return (
-    <footer className="mt-auto bg-[#f4f4f2] text-xs leading-relaxed text-[#666]">
+    <footer
+      className={cn(
+        "mt-auto shrink-0 bg-[#f4f4f2] text-xs leading-relaxed text-[#666]",
+        className,
+      )}
+    >
       <div className="mx-auto flex max-w-[1280px] flex-col gap-8 px-6 py-10 lg:flex-row lg:justify-between lg:px-10">
         <div className="space-y-3">
           <p className="text-base font-bold tracking-wider text-[#00704A]">
