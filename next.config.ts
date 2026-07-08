@@ -19,17 +19,12 @@ const nextConfig: NextConfig = {
         port: "8081",
       },
       {
-        protocol: "http",
-        hostname: "121.175.193.122",
-        port: "8081",
-      },
-      {
         protocol: "https",
         hostname: "image.istarbucks.co.kr",
       },
       {
         protocol: "https",
-        hostname: "*.amazonaws.com",
+        hostname: "*.amazonaws.com", // AWS S3 이미지 허용
       },
     ],
   },
