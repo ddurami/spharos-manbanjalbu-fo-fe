@@ -64,19 +64,21 @@ export async function fetchAddressById(
   }
 }
 
-export async function fetchDefaultAddress(): Promise<Address | null> {
+export async function fetchDefaultStoredAddress(): Promise<StoredAddress | null> {
   if (!hasAccessToken()) {
-    return getAddress();
+    const addresses = getStoredAddresses();
+    const defaultAddress = addresses.find((address) => address.isDefault);
+    return defaultAddress ?? addresses[0] ?? null;
   }
 
   const addresses = await fetchAddresses();
   const defaultAddress = addresses.find((address) => address.isDefault);
+  return defaultAddress ?? addresses[0] ?? null;
+}
 
-  if (defaultAddress) {
-    return toAddress(defaultAddress);
-  }
-
-  return addresses[0] ? toAddress(addresses[0]) : null;
+export async function fetchDefaultAddress(): Promise<Address | null> {
+  const stored = await fetchDefaultStoredAddress();
+  return stored ? toAddress(stored) : null;
 }
 
 export async function createAddress(

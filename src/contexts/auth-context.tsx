@@ -20,6 +20,7 @@ type StoredMember = Pick<
 >;
 
 type AuthContextValue = {
+  isAuthReady: boolean;
   isLoggedIn: boolean;
   accessToken: string | null;
   member: StoredMember | null;
@@ -30,6 +31,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [member, setMember] = useState<StoredMember | null>(null);
@@ -53,6 +55,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (storedAuthFlag && !storedToken) {
       localStorage.removeItem(AUTH_STORAGE_KEY);
     }
+
+    setIsAuthReady(true);
   }, []);
 
   const login = useCallback((response: MemberLoginResponse) => {
@@ -87,8 +91,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ isLoggedIn, accessToken, member, login, logout }),
-    [isLoggedIn, accessToken, member, login, logout],
+    () => ({ isAuthReady, isLoggedIn, accessToken, member, login, logout }),
+    [isAuthReady, isLoggedIn, accessToken, member, login, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

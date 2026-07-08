@@ -5,44 +5,68 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CheckoutActionBar } from "@/components/checkout/checkout-action-bar";
+import { CheckoutPriceSummary } from "@/components/checkout/checkout-price-summary";
 import { DiscountSection } from "@/components/checkout/discount-section";
+import { AddressSection } from "@/components/checkout/address-section";
 import { OrderSection } from "@/components/checkout/order-section";
 import { PaymentMethodSection } from "@/components/checkout/payment-method-section";
-import { PriceSummarySidebar } from "@/components/common/price-summary-sidebar";
-import { AddressSection } from "@/components/checkout/address-section";
 import { Button } from "@/components/ui/button";
-import { fetchDefaultAddress } from "@/lib/address/address-service";
-import type { Address } from "@/lib/address/types";
+import { fetchDefaultStoredAddress } from "@/lib/address/address-service";
+import { toAddress } from "@/lib/address/mapper";
+import type { Address, StoredAddress } from "@/lib/address/types";
 import { isRegisteredAddress } from "@/lib/address/validate-address";
 import {
   deleteCartItems,
   getCheckoutCart,
   updateCartItemQuantity,
 } from "@/lib/api/cart";
+import { getCards } from "@/lib/api/card";
 import { ApiError } from "@/lib/api/client";
-import { parseCartItemIds, toOrderItems } from "@/lib/cart/checkout";
+import { buildOrderCreateRequest, createOrder } from "@/lib/api/order";
+import { createPayment } from "@/lib/api/payment";
+import { parseCartItemIds, toOrderItems, buildCheckoutAddressHref } from "@/lib/cart/checkout";
 import { MAX_ITEM_QUANTITY } from "@/lib/cart/types";
 import { calculateCheckoutSummary } from "@/lib/checkout/calculate-summary";
+import { saveOrderResult } from "@/lib/checkout/order-session";
 import { CHECKOUT_ACTION_BAR_HEIGHT } from "@/lib/checkout/types";
 import type { OrderItem, PaymentMethod } from "@/lib/checkout/types";
+import type { CardResponse } from "@/types/card";
 import { useAuth } from "@/contexts/auth-context";
 
 export function CheckoutContent() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoggedIn, logout } = useAuth();
+  const { isAuthReady, isLoggedIn, logout } = useAuth();
   const cartItemIds = useMemo(
     () => parseCartItemIds(searchParams.get("cartItemIds")),
     [searchParams],
   );
+  const checkoutAddressRegisterHref = useMemo(
+    () => buildCheckoutAddressHref(cartItemIds),
+    [cartItemIds],
+  );
+  const checkoutAddressChangeHref = useMemo(
+    () => buildCheckoutAddressHref(cartItemIds, { mode: "change" }),
+    [cartItemIds],
+  );
 
   const [items, setItems] = useState<OrderItem[]>([]);
   const [paymentMethod, setPaymentMethod] =
-    useState<PaymentMethod>("starbucks-card");
-  const [address, setAddress] = useState<Address | null>(null);
+    useState<PaymentMethod>("credit-card");
+  const [cards, setCards] = useState<CardResponse[]>([]);
+  const [defaultStoredAddress, setDefaultStoredAddress] =
+    useState<StoredAddress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [isCardsLoading, setIsCardsLoading] = useState(true);
+  const [isReservationEnabled, setIsReservationEnabled] = useState(false);
+  const [selectedReservationDate, setSelectedReservationDate] = useState<
+    string | null
+  >(null);
 
   const loadCheckoutItems = useCallback(async () => {
     if (cartItemIds.length === 0) {
@@ -77,40 +101,154 @@ export function CheckoutContent() {
   }, [cartItemIds, logout, router]);
 
   useEffect(() => {
+    if (!isAuthReady) {
+      return;
+    }
+
     if (!isLoggedIn) {
       router.replace("/login");
       return;
     }
 
     void loadCheckoutItems();
-  }, [isLoggedIn, loadCheckoutItems, router]);
+  }, [isAuthReady, isLoggedIn, loadCheckoutItems, router]);
 
   useEffect(() => {
-    if (pathname !== "/checkout") {
+    if (!isAuthReady || !isLoggedIn || pathname !== "/checkout") {
       return;
     }
 
     const loadAddress = async () => {
       try {
-        setAddress(await fetchDefaultAddress());
+        setDefaultStoredAddress(await fetchDefaultStoredAddress());
       } catch {
-        setAddress(null);
+        setDefaultStoredAddress(null);
       }
     };
 
     void loadAddress();
+
     const handleFocus = () => {
       void loadAddress();
     };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void loadAddress();
+      }
+    };
+
     window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [pathname]);
+  }, [isAuthReady, isLoggedIn, pathname, searchParams]);
 
+  useEffect(() => {
+    if (!isAuthReady || !isLoggedIn || pathname !== "/checkout") {
+      return;
+    }
+
+    const loadCards = async () => {
+      setIsCardsLoading(true);
+
+      try {
+        const cardList = await getCards();
+        setCards(cardList);
+        const defaultCard =
+          cardList.find((card) => card.isDefault) ?? cardList[0] ?? null;
+        setSelectedCardId(defaultCard?.cardId ?? null);
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          logout();
+          router.replace("/login");
+          return;
+        }
+
+        setCards([]);
+        setSelectedCardId(null);
+      } finally {
+        setIsCardsLoading(false);
+      }
+    };
+
+    void loadCards();
+  }, [isAuthReady, isLoggedIn, logout, pathname, router, searchParams]);
+
+  const address = useMemo<Address | null>(
+    () => (defaultStoredAddress ? toAddress(defaultStoredAddress) : null),
+    [defaultStoredAddress],
+  );
   const summary = useMemo(() => calculateCheckoutSummary(items), [items]);
   const hasAddress = isRegisteredAddress(address);
+  const hasSelectedCard = !isCardsLoading && selectedCardId !== null;
+
+  const handlePurchase = async () => {
+    if (!defaultStoredAddress || cartItemIds.length === 0) {
+      return;
+    }
+
+    if (selectedCardId == null) {
+      setPurchaseError("결제할 카드를 선택해 주세요.");
+      return;
+    }
+
+    if (isReservationEnabled && !selectedReservationDate) {
+      setPurchaseError("예약 배송일을 선택해 주세요.");
+      return;
+    }
+
+    const memberAddressId = Number(defaultStoredAddress.id);
+    if (!Number.isFinite(memberAddressId) || memberAddressId <= 0) {
+      setPurchaseError(
+        "등록된 배송지 정보가 올바르지 않습니다. 배송지를 다시 등록해 주세요.",
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    setPurchaseError(null);
+
+    try {
+      const order = await createOrder(
+        buildOrderCreateRequest({
+          cartItemIds,
+          memberAddressId,
+          paymentMethod,
+          deliveryMemo: address?.deliveryMemo.trim() || undefined,
+          orderType: isReservationEnabled ? "RESERVATION" : undefined,
+          reservationDeliveryDate: isReservationEnabled
+            ? selectedReservationDate ?? undefined
+            : undefined,
+        }),
+      );
+
+      const payment = await createPayment({
+        orderNo: order.orderNo,
+        cardId: selectedCardId,
+      });
+
+      saveOrderResult(order, payment);
+      window.dispatchEvent(new Event("cart-updated"));
+      router.push("/checkout/complete");
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        logout();
+        router.replace("/login");
+        return;
+      }
+
+      setPurchaseError(
+        error instanceof ApiError
+          ? error.message
+          : "결제 처리 중 오류가 발생했습니다.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleQuantityChange = async (id: string, quantity: number) => {
     const nextQuantity = Math.min(MAX_ITEM_QUANTITY, Math.max(1, quantity));
@@ -151,7 +289,7 @@ export function CheckoutContent() {
     }
   };
 
-  if (!isLoggedIn) {
+  if (!isAuthReady || !isLoggedIn) {
     return null;
   }
 
@@ -181,7 +319,9 @@ export function CheckoutContent() {
       <div className="mx-auto flex w-full max-w-[850px] flex-1 flex-col items-center justify-center gap-6 px-[50px] py-20 lg:px-[300px]">
         <p className="text-base text-destructive">{errorMessage}</p>
         <Link href="/cart">
-          <Button variant="outline" className="rounded-full px-8">장바구니로 돌아가기</Button>
+          <Button variant="outline" className="rounded-full px-8">
+            장바구니로 돌아가기
+          </Button>
         </Link>
       </div>
     );
@@ -199,7 +339,11 @@ export function CheckoutContent() {
 
         <div className="flex flex-1 flex-col gap-[50px] lg:flex-row lg:items-start">
           <div className="flex w-full max-w-[850px] flex-col gap-[50px]">
-            <AddressSection address={address} />
+            <AddressSection
+              address={address}
+              registerHref={checkoutAddressRegisterHref}
+              changeHref={checkoutAddressChangeHref}
+            />
             <OrderSection
               items={items}
               onQuantityChange={handleQuantityChange}
@@ -209,14 +353,35 @@ export function CheckoutContent() {
             <PaymentMethodSection
               value={paymentMethod}
               onChange={setPaymentMethod}
+              cards={cards}
+              selectedCardId={selectedCardId}
+              onCardSelect={setSelectedCardId}
+              isCardsLoading={isCardsLoading}
             />
           </div>
 
-          <PriceSummarySidebar summary={summary} />
+          <CheckoutPriceSummary
+            summary={summary}
+            hasAddress={hasAddress}
+            reservationItems={items}
+            isReservationEnabled={isReservationEnabled}
+            selectedReservationDate={selectedReservationDate}
+            onReservationEnabledChange={setIsReservationEnabled}
+            onReservationDateChange={setSelectedReservationDate}
+          />
         </div>
       </div>
 
-      <CheckoutActionBar summary={summary} hasAddress={hasAddress} />
+      <CheckoutActionBar
+        summary={summary}
+        hasAddress={hasAddress}
+        hasSelectedCard={hasSelectedCard}
+        isSubmitting={isSubmitting}
+        purchaseError={purchaseError}
+        onPurchase={() => {
+          void handlePurchase();
+        }}
+      />
     </div>
   );
 }

@@ -14,9 +14,15 @@ const outlineButtonClassName =
 
 type AddressSectionProps = {
   address: Address | null;
+  registerHref: string;
+  changeHref: string;
 };
 
-export function AddressSection({ address }: AddressSectionProps) {
+export function AddressSection({
+  address,
+  registerHref,
+  changeHref,
+}: AddressSectionProps) {
   const hasAddress = isRegisteredAddress(address);
 
   const deliveryMemoLabel = address?.deliveryMemo
@@ -50,7 +56,7 @@ export function AddressSection({ address }: AddressSectionProps) {
           </p>
         )}
 
-        <Link href={hasAddress ? "/checkout/address?mode=change" : "/checkout/address"}>
+        <Link href={hasAddress ? changeHref : registerHref}>
           <Button variant="outline" className={outlineButtonClassName}>
             {hasAddress ? "배송지 변경" : "배송지 등록"}
           </Button>
