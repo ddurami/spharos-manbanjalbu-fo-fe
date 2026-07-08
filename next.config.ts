@@ -19,19 +19,23 @@ const nextConfig: NextConfig = {
         port: "8081",
       },
       {
-        protocol: "http",
-        hostname: "121.175.193.122",
-        port: "8081",
-      },
-      {
         protocol: "https",
         hostname: "image.istarbucks.co.kr",
       },
       {
         protocol: "https",
-        hostname: "*.amazonaws.com",
+        hostname: "*.amazonaws.com", // AWS S3 이미지 허용
       },
     ],
+  },
+  // 백엔드 IP 주소를 숨기기 위한 프록시(Rewrite) 설정
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${process.env.BACKEND_URL}/api/:path*`,
+      },
+    ];
   },
 };
 
