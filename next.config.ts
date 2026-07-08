@@ -28,18 +28,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // BACKEND_URL이 있을 때만 rewrite 적용 (미설정 시 빌드 실패 방지)
-  async rewrites() {
-    const backendUrl = process.env.BACKEND_URL;
-    if (!backendUrl) return [];
-
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${backendUrl}/api/:path*`,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
