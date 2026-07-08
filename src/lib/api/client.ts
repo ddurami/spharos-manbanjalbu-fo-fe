@@ -1,9 +1,10 @@
 import type { ApiResponse } from "@/types/member";
 
-// 배포: 상대 경로(/api) → rewrite 프록시, 로컬: localhost 직접 호출
+// production: 상대 경로(/api) → rewrite, development: localhost 직접 호출
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  (process.env.NODE_ENV === "development" ? "http://localhost:8080" : "");
+  process.env.NODE_ENV === "development"
+    ? (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080")
+    : "";
 
 export class ApiError extends Error {
   status: number;
