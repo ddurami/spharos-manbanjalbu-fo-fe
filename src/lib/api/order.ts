@@ -2,6 +2,9 @@ import type { PaymentMethod as CheckoutPaymentMethod } from "@/lib/checkout/type
 import type {
   OrderCreateRequest,
   OrderCreateResponse,
+  OrderDetailResponse,
+  OrderListParams,
+  OrderListResponse,
   OrderPaymentMethod,
 } from "@/types/order";
 import { apiRequest } from "@/lib/api/client";
@@ -23,6 +26,30 @@ export function createOrder(request: OrderCreateRequest) {
     method: "POST",
     body: JSON.stringify(request),
   });
+}
+
+export function getOrders(params: OrderListParams = {}) {
+  const searchParams = new URLSearchParams();
+
+  if (params.page != null) {
+    searchParams.set("page", String(params.page));
+  }
+  if (params.size != null) {
+    searchParams.set("size", String(params.size));
+  }
+  if (params.period) {
+    searchParams.set("period", params.period);
+  }
+  if (params.orderType) {
+    searchParams.set("orderType", params.orderType);
+  }
+
+  const query = searchParams.toString();
+  return apiRequest<OrderListResponse>(`/api/orders${query ? `?${query}` : ""}`);
+}
+
+export function getOrderDetail(orderNo: string) {
+  return apiRequest<OrderDetailResponse>(`/api/orders/${orderNo}`);
 }
 
 export type CreateOrderParams = {

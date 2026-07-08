@@ -231,6 +231,7 @@ export function CheckoutContent() {
       });
 
       saveOrderResult(order, payment);
+      window.dispatchEvent(new Event("cart-updated"));
       router.push("/checkout/complete");
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {

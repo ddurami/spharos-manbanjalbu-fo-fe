@@ -1,3 +1,4 @@
+import { addCartItem, getCart } from "@/lib/api/cart";
 import type { CartItem } from "@/lib/cart/types";
 import type { OrderItem } from "@/lib/checkout/types";
 
@@ -34,6 +35,22 @@ export function buildCheckoutHref(cartItemIds: Iterable<number>): string {
   }
 
   return `/checkout?cartItemIds=${ids.join(",")}`;
+}
+
+export async function prepareBuyNowCartItemId(
+  productId: number,
+  quantity: number,
+): Promise<number> {
+  await addCartItem(productId, quantity);
+
+  const cart = await getCart();
+  const cartItem = cart.cartItems.find((item) => item.productId === productId);
+
+  if (!cartItem) {
+    throw new Error("장바구니에 상품을 담지 못했습니다.");
+  }
+
+  return cartItem.cartItemId;
 }
 
 export function buildCheckoutAddressHref(

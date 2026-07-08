@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Minus, Plus, Share2Icon } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { addCartItem } from "@/lib/api/cart";
+import { ApiError } from "@/lib/api/client";
+import { buildCheckoutHref, prepareBuyNowCartItemId } from "@/lib/cart/checkout";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,7 @@ export function ProductDetailHeader({
   const [quantity, setQuantity] = useState(1);
   const [isCartAlertOpen, setIsCartAlertOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
 
   const totalPrice = product.price * quantity;
 
@@ -53,12 +56,29 @@ export function ProductDetailHeader({
     }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!isLoggedIn) {
       alert("로그인 후 이용해주세요");
       return;
     }
-    router.push(`/checkout?productId=${product.id}&quantity=${quantity}`);
+
+    setIsBuying(true);
+
+    try {
+      const cartItemId = await prepareBuyNowCartItemId(product.id, quantity);
+      window.dispatchEvent(new Event("cart-updated"));
+      router.push(buildCheckoutHref([cartItemId]));
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "구매하기로 이동하지 못했습니다.";
+      alert(message);
+    } finally {
+      setIsBuying(false);
+    }
   };
 
   const handleShareUrl = async () => {
@@ -192,10 +212,13 @@ export function ProductDetailHeader({
 
               <button
                 type="button"
-                onClick={handleBuyNow}
-                className="h-[48px] flex-1 rounded-full bg-sb-green text-sm font-medium text-white hover:bg-[#009658]"
+                onClick={() => {
+                  void handleBuyNow();
+                }}
+                disabled={isBuying}
+                className="h-[48px] flex-1 rounded-full bg-sb-green text-sm font-medium text-white hover:bg-[#009658] disabled:opacity-50"
               >
-                구매하기
+                {isBuying ? "이동 중..." : "구매하기"}
               </button>
             </div>
           </div>
