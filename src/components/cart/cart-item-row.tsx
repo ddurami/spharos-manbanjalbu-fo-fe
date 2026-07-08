@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { Minus, Plus, Trash2 } from "lucide-react";
 
+import { ImagePlaceholder } from "@/components/common/ImagePlaceholder";
 import { PriceDisplay } from "@/components/common/price-display";
 import { Button } from "@/components/ui/button";
 import type { CartItem } from "@/lib/cart/types";
@@ -44,13 +44,15 @@ export function CartItemRow({
         />
       </label>
 
-      <Image
-        src={item.thumbnailUrl}
-        alt={item.productName}
-        width={100}
-        height={100}
-        className="size-[100px] shrink-0 rounded-lg object-cover"
-      />
+      <div className="size-[100px] shrink-0 overflow-hidden rounded-lg bg-placeholder">
+        <ImagePlaceholder
+          src={item.thumbnailUrl}
+          alt={item.productName}
+          width={100}
+          height={100}
+          className="size-full object-cover"
+        />
+      </div>
 
       <div className="flex flex-1 items-center justify-between">
         <div className="flex flex-col gap-5">

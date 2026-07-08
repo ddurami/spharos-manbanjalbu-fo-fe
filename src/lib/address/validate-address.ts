@@ -45,3 +45,13 @@ export function validateAddress(address: Address): AddressErrors {
 export function hasValidationErrors(errors: AddressErrors): boolean {
   return Object.keys(errors).length > 0;
 }
+
+export function isRegisteredAddress(address: Address | null | undefined): boolean {
+  return Boolean(
+    address?.recipient &&
+      address.zipCode &&
+      address.address &&
+      address.addressDetail &&
+      address.phone1,
+  );
+}

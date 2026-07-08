@@ -7,6 +7,7 @@ import {
   getDeliveryMemoLabel,
 } from "@/lib/address/format-address";
 import type { Address } from "@/lib/address/types";
+import { isRegisteredAddress } from "@/lib/address/validate-address";
 
 const outlineButtonClassName =
   "h-10 shrink-0 rounded-full border-[1.5px] border-primary px-5 text-[17px] tracking-tight text-primary hover:bg-sb-green-soft hover:text-primary";
@@ -16,13 +17,7 @@ type AddressSectionProps = {
 };
 
 export function AddressSection({ address }: AddressSectionProps) {
-  const hasAddress = Boolean(
-    address?.recipient &&
-      address.zipCode &&
-      address.address &&
-      address.addressDetail &&
-      address.phone1
-  );
+  const hasAddress = isRegisteredAddress(address);
 
   const deliveryMemoLabel = address?.deliveryMemo
     ? getDeliveryMemoLabel(address.deliveryMemo)
@@ -55,7 +50,7 @@ export function AddressSection({ address }: AddressSectionProps) {
           </p>
         )}
 
-        <Link href={hasAddress ? "/mypage/address" : "/mypage/address/new"}>
+        <Link href={hasAddress ? "/checkout/address?mode=change" : "/checkout/address"}>
           <Button variant="outline" className={outlineButtonClassName}>
             {hasAddress ? "배송지 변경" : "배송지 등록"}
           </Button>

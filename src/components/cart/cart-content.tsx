@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { CartActionBar, ACTION_BAR_HEIGHT } from "@/components/cart/cart-action-bar";
 import { CartEmpty } from "@/components/cart/cart-empty";
@@ -15,6 +16,9 @@ import {
 import type { CartItem } from "@/lib/cart/types";
 import type { CheckoutSummary } from "@/lib/checkout/types";
 
+const FREE_SHIPPING_THRESHOLD = 30000;
+const SHIPPING_FEE = 3000;
+
 function calculateSummary(
   items: CartItem[],
   selectedIds: Set<number>,
@@ -24,20 +28,33 @@ function calculateSummary(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
+  const shippingFee =
+    selected.length > 0 && productAmount < FREE_SHIPPING_THRESHOLD
+      ? SHIPPING_FEE
+      : 0;
 
   return {
     itemCount: selected.length,
     productAmount,
     discountAmount: 0,
-    shippingFee: 0,
-    totalAmount: productAmount,
+    shippingFee,
+    totalAmount: productAmount + shippingFee,
   };
 }
 
 export function CartContent() {
+  const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("manbanjalbu-access-token");
+    if (!token) {
+      alert("로그인 후 이용해주세요");
+      router.replace("/login");
+    }
+  }, [router]);
 
   const fetchCart = useCallback(async () => {
     try {
@@ -110,6 +127,7 @@ export function CartContent() {
 
     try {
       await deleteCartItems([cartItemId]);
+      window.dispatchEvent(new Event("cart-updated"));
     } catch {
       /* 낙관적 업데이트 유지 */
     }
@@ -126,6 +144,7 @@ export function CartContent() {
 
     try {
       await deleteCartItems(idsToDelete);
+      window.dispatchEvent(new Event("cart-updated"));
     } catch {
       /* 낙관적 업데이트 유지 */
     }
@@ -139,6 +158,7 @@ export function CartContent() {
 
     try {
       await deleteAllCartItems();
+      window.dispatchEvent(new Event("cart-updated"));
     } catch {
       /* 낙관적 업데이트 유지 */
     }
@@ -160,9 +180,9 @@ export function CartContent() {
       >
         <h1 className="text-[36px] font-medium text-foreground">장바구니</h1>
 
-        <div className="flex flex-1 flex-col gap-8 lg:flex-row lg:items-stretch">
+        <div className="flex flex-1 flex-col gap-8 lg:flex-row lg:items-start">
           <div className="flex w-full min-w-0 flex-1 flex-col">
-            <div className="flex flex-1 flex-col border border-sb-border bg-white">
+            <div className="flex flex-col border border-sb-border bg-white">
               <div className="flex h-14 items-center justify-between border-b border-sb-border px-[30px]">
                 <label className="flex cursor-pointer items-center gap-2.5">
                   <input
@@ -222,7 +242,10 @@ export function CartContent() {
         </div>
       </div>
 
-      <CartActionBar summary={summary} />
+      <CartActionBar
+        summary={summary}
+        selectedCartItemIds={Array.from(selectedIds)}
+      />
     </div>
   );
 }

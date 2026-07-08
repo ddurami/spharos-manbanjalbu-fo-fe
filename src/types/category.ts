@@ -1,0 +1,20 @@
+export type Subcategory = {
+  id: number;
+  name: string;
+  displayOrder: number;
+};
+
+export type Category = {
+  id: number;
+  name: string;
+  displayOrder: number;
+  imageUrl: string;
+  hasCapacityFilter: boolean;
+  subcategories: Subcategory[];
+};
+
+export type Season = {
+  id: number;
+  name: string;
+  createdAt: string;
+};

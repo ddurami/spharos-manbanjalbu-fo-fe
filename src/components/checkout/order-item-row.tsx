@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { Minus, Plus, X } from "lucide-react";
 
+import { ImagePlaceholder } from "@/components/common/ImagePlaceholder";
 import { PriceDisplay } from "@/components/common/price-display";
 import { Button } from "@/components/ui/button";
 import type { OrderItem } from "@/lib/checkout/types";
@@ -31,7 +31,7 @@ export function OrderItemRow({
       )}
     >
       <div className="flex gap-5">
-        <Image
+        <ImagePlaceholder
           src={item.image}
           alt={item.name}
           width={110}

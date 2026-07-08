@@ -6,7 +6,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import { MypageAddressCard } from "@/components/mypage/address/mypage-address-card";
 import { useAuth } from "@/contexts/auth-context";
-import { deleteStoredAddress, getStoredAddresses } from "@/lib/address/storage";
+import { fetchAddresses, removeAddress } from "@/lib/address/address-service";
+import { ApiError } from "@/lib/api/client";
 import type { StoredAddress } from "@/lib/address/types";
 
 export function MypageAddressListContent() {
@@ -14,9 +15,24 @@ export function MypageAddressListContent() {
   const { isLoggedIn } = useAuth();
   const [isReady, setIsReady] = useState(false);
   const [addresses, setAddresses] = useState<StoredAddress[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const loadAddresses = useCallback(() => {
-    setAddresses(getStoredAddresses());
+  const loadAddresses = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError(null);
+
+    try {
+      setAddresses(await fetchAddresses());
+    } catch (error) {
+      setLoadError(
+        error instanceof ApiError
+          ? error.message
+          : "배송지 목록을 불러오지 못했습니다.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -31,17 +47,26 @@ export function MypageAddressListContent() {
 
   useEffect(() => {
     if (isReady && isLoggedIn) {
-      loadAddresses();
+      void loadAddresses();
     }
   }, [isReady, isLoggedIn, loadAddresses]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!window.confirm("선택한 배송지를 삭제하시겠습니까?")) {
       return;
     }
 
-    if (deleteStoredAddress(id)) {
-      loadAddresses();
+    try {
+      const deleted = await removeAddress(id);
+      if (deleted) {
+        await loadAddresses();
+      }
+    } catch (error) {
+      window.alert(
+        error instanceof ApiError
+          ? error.message
+          : "배송지 삭제 중 오류가 발생했습니다.",
+      );
     }
   };
 
@@ -64,7 +89,17 @@ export function MypageAddressListContent() {
           </Link>
         </div>
 
-        {addresses.length > 0 ? (
+        {loadError ? (
+          <div className="border border-destructive/30 bg-destructive/5 px-8 py-4 text-sm text-destructive">
+            {loadError}
+          </div>
+        ) : null}
+
+        {isLoading ? (
+          <div className="border border-sb-border px-8 py-16 text-center text-base text-sb-text-muted">
+            배송지 목록을 불러오는 중...
+          </div>
+        ) : addresses.length > 0 ? (
           <div className="grid grid-cols-1 border-t border-l border-sb-border md:grid-cols-2">
             {addresses.map((address) => (
               <div
