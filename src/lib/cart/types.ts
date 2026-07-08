@@ -8,6 +8,7 @@ export type CartItem = {
   isNew: boolean;
   quantity: number;
   createdAt: string;
+  reservationAvailable?: boolean;
 };
 
 export type CartListResponse = {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { AddressForm } from "@/components/address/address-form";
+import { CheckoutAddressContent } from "@/components/checkout/checkout-address-content";
 
 type AddressPageProps = {
   searchParams: Promise<{ mode?: string }>;
@@ -32,7 +33,15 @@ export default async function AddressPage({ searchParams }: AddressPageProps) {
         <h1 className="pb-[50px] text-[36px] font-medium text-foreground">
           {title}
         </h1>
-        <AddressForm />
+        <Suspense
+          fallback={
+            <p className="text-base text-sb-text-muted">
+              배송지 정보를 불러오는 중...
+            </p>
+          }
+        >
+          <CheckoutAddressContent />
+        </Suspense>
       </div>
     </div>
   );

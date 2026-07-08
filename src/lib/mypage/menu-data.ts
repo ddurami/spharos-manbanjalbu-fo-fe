@@ -15,7 +15,7 @@ export type MypageMenuItem = {
 };
 
 const SHOPPING_MENU_BASE = [
-  { key: "orderHistory" as const, label: "주문내역", href: "#", icon: FileText },
+  { key: "orderHistory" as const, label: "주문내역", href: "/mypage/orders", icon: FileText },
   {
     key: "orderCancellation" as const,
     label: "주문 취소 내역",

@@ -11,20 +11,22 @@ const NOTICE_ITEMS = [
 type PriceSummarySidebarProps = {
   summary: CheckoutSummary;
   className?: string;
+  embedded?: boolean;
 };
 
 export function PriceSummarySidebar({
   summary,
   className,
+  embedded = false,
 }: PriceSummarySidebarProps) {
-  return (
-    <aside
+  const content = (
+    <div
       className={cn(
-        "w-full max-w-[440px] shrink-0 lg:sticky lg:top-[96px] lg:self-start",
+        "flex h-full flex-col justify-between gap-5 bg-white px-[30px] py-[30px]",
+        !embedded && "border border-sb-border",
         className,
       )}
     >
-      <div className="flex h-full flex-col justify-between gap-5 border border-sb-border bg-white px-[30px] py-[30px]">
         <div className="flex flex-col gap-8">
           <dl className="space-y-2.5 text-[15px]">
             <div className="flex items-baseline justify-between">
@@ -66,7 +68,16 @@ export function PriceSummarySidebar({
             </div>
           ))}
         </div>
-      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <aside className="w-full max-w-[440px] shrink-0 lg:sticky lg:top-[96px] lg:self-start">
+      {content}
     </aside>
   );
 }

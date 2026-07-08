@@ -4,6 +4,7 @@ export type OrderItem = {
   price: number;
   quantity: number;
   image: string;
+  reservationAvailable?: boolean;
 };
 
 export type CheckoutSummary = {
@@ -14,10 +15,6 @@ export type CheckoutSummary = {
   totalAmount: number;
 };
 
-export type PaymentMethod =
-  | "starbucks-card"
-  | "simple-pay"
-  | "ssgpay"
-  | "credit-card";
+export type PaymentMethod = "credit-card" | "simple-pay" | "ssgpay";
 
 export const CHECKOUT_ACTION_BAR_HEIGHT = 132;
